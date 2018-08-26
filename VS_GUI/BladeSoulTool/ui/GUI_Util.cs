@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Windows.Forms;
 using BladeSoulTool.lib;
@@ -37,7 +37,7 @@ namespace BladeSoulTool.ui
             this.comboBoxSelectLang.SelectedIndexChanged += new EventHandler(comboBoxSelectLang_SelectedIndexChanged);
 
             // license文字内容
-            this.textBoxLicense.Text = string.Format(this._i18N.LoadI18NValue("GuiUtil", "license"), BstManager.ReleaseUrl17173);
+            this.textBoxLicense.Text = string.Format(this._i18N.LoadI18NValue("GuiUtil", "license"), "");
 
             // 选择游戏安装路径控件
             this.btnSelectGameDir.Click += new EventHandler(this.btnSelectGameDir_Click);
@@ -66,129 +66,6 @@ namespace BladeSoulTool.ui
                     BstManager.Instance.SystemSettings["path"]["game"] = path;
                     BstManager.WriteJsonFile(BstManager.PathJsonSettings, BstManager.Instance.SystemSettings);
                 }
-            }
-        }
-
-        private void btnDownloadAll_Click(Object sender, EventArgs e)
-        {
-            if (this._loadingThread != null && this._loadingThread.IsAlive)
-            {
-                return; // 之前启动的加载线程还活着
-            }
-            this._loadingThread = new Thread(this.DownloadAllImageResources) { IsBackground = true };
-            this._loadingThread.Start();
-        }
-
-        private void btnStopDownload_Click(Object sender, EventArgs e)
-        {
-            if (this._loadingThread != null && this._loadingThread.IsAlive)
-            {
-                try
-                {
-                    this._loadingThread.Abort();
-                }
-                catch (Exception ex)
-                {
-                    BstLogger.Instance.Log(ex.ToString());
-                }
-                this._loadingThread = null;
-                BstManager.ShowMsgInTextBox(this.textBoxOut, this._i18N.LoadI18NValue("GuiUtil", "downloadStopped"));
-            }
-            this.UpdateDownloadProgressBar(0); // 更新进度条为0
-        }
-
-        private void DownloadAllImageResources()
-        {
-            var finishedCount = 0;
-            var types = BstManager.Instance.Types;
-
-            foreach (var type in types)
-            {
-                JObject data = null;
-                switch (Array.IndexOf(types, type))
-                {
-                    case BstManager.TypeAttach:
-                        data = BstManager.Instance.DataAttach;
-                        break;
-                    case BstManager.TypeCostume:
-                        data = BstManager.Instance.DataCostume;
-                        break;
-                    case BstManager.TypeWeapon:
-                        data = BstManager.Instance.DataWeapon;
-                        break;
-                }
-
-                foreach (var element in data.Properties())
-                {
-                    var elementData = (JObject) element.Value;
-                    var iconPath = BstManager.GetIconPath(elementData);
-                    var itemPicPath = BstManager.GetItemPicPath(Array.IndexOf(types, type), elementData);
-
-                    if (File.Exists(iconPath))
-                    {
-                        // 无需下载
-                        BstManager.ShowMsgInTextBox(this.textBoxOut, string.Format(this._i18N.LoadI18NValue("BstIconLoader", "iconDownloadSucceed"), iconPath));
-                    }
-                    else
-                    {
-                        iconPath = BstManager.GetIconPath(elementData, false);
-                        if (iconPath == null)
-                        {
-                            // 下载失败
-                            BstManager.ShowMsgInTextBox(this.textBoxOut, string.Format(this._i18N.LoadI18NValue("BstIconLoader", "iconDownloadFailed"), iconPath));
-                        }
-                        else
-                        {
-                            // 下载成功
-                            BstManager.ShowMsgInTextBox(this.textBoxOut, string.Format(this._i18N.LoadI18NValue("BstIconLoader", "iconDownloadSucceed"), iconPath));
-                        }
-                    }
-
-                    if (File.Exists(itemPicPath))
-                    {
-                        // 无需下载
-                        BstManager.ShowMsgInTextBox(this.textBoxOut, string.Format(this._i18N.LoadI18NValue("BstPicLoader", "picDownloadSucceed"), itemPicPath));
-                    }
-                    else
-                    {
-                        itemPicPath = BstManager.GetItemPicPath(Array.IndexOf(types, type), elementData, false);
-                        if (itemPicPath == null)
-                        {
-                            // 下载失败
-                            BstManager.ShowMsgInTextBox(this.textBoxOut, string.Format(this._i18N.LoadI18NValue("BstPicLoader", "picDownloadFailed"), itemPicPath));
-                        }
-                        else
-                        {
-                            // 下载成功
-                            BstManager.ShowMsgInTextBox(this.textBoxOut, string.Format(this._i18N.LoadI18NValue("BstPicLoader", "picDownloadSucceed"), itemPicPath));
-                        }
-                    }
-
-                    finishedCount += 2;
-                    if (finishedCount >= this.progBarDownloadAll.Maximum)
-                    {
-                        this.UpdateDownloadProgressBar(0);
-                        BstManager.ShowMsgInTextBox(this.textBoxOut, this._i18N.LoadI18NValue("GuiUtil", "downloadAllDone"));
-                    }
-                    else
-                    {
-                        this.UpdateDownloadProgressBar(finishedCount);
-                    }
-                }
-            }
-        }
-
-        delegate void SetValueCallback(int value);
-        private void UpdateDownloadProgressBar(int value)
-        {
-            if (this.progBarDownloadAll.InvokeRequired)
-            {
-                var d = new SetValueCallback(UpdateDownloadProgressBar);
-                this.Invoke(d, new object[] { value });
-            }
-            else
-            {
-                this.progBarDownloadAll.Value = value;
             }
         }
 

@@ -55,7 +55,6 @@ namespace BladeSoulTool.ui
             this.labelRestore.Text = this._i18N.LoadI18NValue("GuiItems", "labelRestore");
             this.labelFilter.Text = this._i18N.LoadI18NValue("GuiItems", "labelFilter");
             this.btnFilter.Text = this._i18N.LoadI18NValue("GuiItems", "btnFilter");
-            this.btnReportIssue.Text = this._i18N.LoadI18NValue("GuiItems", "btnReportIssue");
         }
 
         private void Init(int formType)
@@ -323,8 +322,8 @@ namespace BladeSoulTool.ui
         {
             // 恢复全部模型
             if (BstManager.DisplayConfirmMessageBox(
-                this._i18N.LoadL10NValue("GuiItems", "actionConfirmTitle"),
-                this._i18N.LoadL10NValue("GuiItems", "actionRestoreMsg")) == DialogResult.OK)
+                this._i18N.LoadI18NValue("GuiItems", "actionConfirmTitle"),
+                this._i18N.LoadI18NValue("GuiItems", "actionRestoreMsg")) == DialogResult.OK)
             {
                 BstManager.Instance.RunGrunt(this.textBoxOut, "restore");
             }
