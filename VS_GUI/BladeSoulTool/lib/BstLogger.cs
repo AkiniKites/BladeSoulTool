@@ -36,7 +36,7 @@ namespace BladeSoulTool.lib
 
         public void Log(string msg)
         {
-            Console.WriteLine(msg);
+            //Console.WriteLine(msg);
             this._buff.AppendLine(DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-ffff") + " " + msg);
         }
     }

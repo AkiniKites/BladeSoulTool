@@ -1,12 +1,15 @@
 {
   "path": {
-    "game": "D:\\Games\\剑灵_腾讯",
-    "data": "contents\\Local\\TENCENT\\CHINESES\\data",
-    "tencent": "contents\\Local\\TENCENT\\CHINESES\\CookedPC",
-    "bns": "contents\\bns\\CookedPC"
+    "game": "C:\\Games\\BnS",
+    "bns": "contents\\bns\\CookedPC",
+    "data": "contents\\Local\\NCWEST\\data",
+    "tencent": "contents\\Local\\NCWEST\\ENGLISH\\CookedPC",
+    
+    "upk": "contents\\bns\\CookedPC",
+    "local": "contents\\Local\\NCWEST\\ENGLISH\\CookedPC"
   },
   "version": "v2.0.7",
-  "lang": "zh_CN",
+  "lang": "en_US",
   "mesh_parser": {
     "childProcess": 15,
     "cycleInterval": 200

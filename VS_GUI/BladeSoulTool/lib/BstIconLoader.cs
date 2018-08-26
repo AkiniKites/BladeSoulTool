@@ -22,7 +22,9 @@ namespace BladeSoulTool.lib
             }
         }
 
-        private const int UpdateThrottle = 30; // 在下载|读取多少张icon图片之后刷新UI，频率过快的刷新会卡死主界面
+        // After downloading|reading how many icon images are read, refresh the UI. 
+        // If the frequency is too fast, the refresh will kill the main interface.
+        private const int UpdateThrottle = 30; 
 
         private readonly Queue<BstIconLoadTask> _queue;
         private Thread _iconLoaderThread;
@@ -40,36 +42,35 @@ namespace BladeSoulTool.lib
             {
                 var task = this._queue.Dequeue();
 
-                // 加载图片
+                // Loading image
                 byte[] pic = null;
-                var downloadUrl = BstManager.GetIconPicUrl(task.ElementData);
-                var imgCachePath = BstManager.GetIconPicTmpPath(task.ElementData);
-                if (File.Exists(imgCachePath))
+                
+                var iconPath  = BstManager.GetIconPath(task.ElementData);
+                if (File.Exists(iconPath))
                 {
-                    // 已有缓存文件
-                    pic = BstManager.GetBytesFromFile(imgCachePath);
+                    pic = BstManager.GetBytesFromFile(iconPath);
                 }
                 else
                 {
-                    // 没有缓存文件，需要下载
-                    pic = BstManager.DownloadImageFile(downloadUrl, imgCachePath);
+                    iconPath = BstManager.GetIconPath(task.ElementData, false);
+                    pic = BstManager.GetBytesFromFile(iconPath);
                 }
 
-                // 检查结果并更新UI
+                // Check the results and update the UI
                 if (pic == null)
                 {
-                    BstManager.ShowMsgInTextBox(task.Box, string.Format(BstI18NLoader.Instance.LoadI18NValue("BstIconLoader", "iconDownloadFailed"), downloadUrl));
-                    // 更新加载失败icon
+                    BstManager.ShowMsgInTextBox(task.Box, string.Format(BstI18NLoader.Instance.LoadI18NValue("BstIconLoader", "iconDownloadFailed"), iconPath));
+                    // Update load failure icon
                     task.Table.Rows[task.RowId][task.ColId] = BstManager.Instance.ErrorIconBytes;
                 }
                 else
                 {
-                    BstManager.ShowMsgInTextBox(task.Box, string.Format(BstI18NLoader.Instance.LoadI18NValue("BstIconLoader", "iconDownloadSucceed"), downloadUrl));
-                    // 更新图片
+                    BstManager.ShowMsgInTextBox(task.Box, string.Format(BstI18NLoader.Instance.LoadI18NValue("BstIconLoader", "iconDownloadSucceed"), iconPath));
+                    // Update picture
                     task.Table.Rows[task.RowId][task.ColId] = pic;
                 }
 
-                // 检查icon加载进度，并刷新ui
+                // Check the icon loading progress and refresh ui
                 updatedCount++;
                 if (updatedCount >= BstIconLoader.UpdateThrottle)
                 {
@@ -85,9 +86,10 @@ namespace BladeSoulTool.lib
                     updatedCount = 0;
                 }
 
-                if (this._queue.Count != 0) continue; // 仍旧还有工作未完成，继续轮询
+                // Still have work still not completed, continue to poll
+                if (this._queue.Count != 0) continue;
 
-                // 当前工作队列已清空，最后更新UI，设置关闭状态
+                // The current work queue has been emptied, the UI is finally updated, and the shutdown status is set.
                 MethodInvoker tableFinalUpdateAction = () => task.Grid.Refresh();
                 task.Grid.BeginInvoke(tableFinalUpdateAction);
                 BstManager.DisplayDataGridViewVerticalScrollBar(task.Grid);
@@ -115,7 +117,7 @@ namespace BladeSoulTool.lib
             {
                 try
                 {
-                    this._iconLoaderThread.Abort(); // 如果线程正在工作的话，强制退出
+                    this._iconLoaderThread.Abort(); // Force exit if the thread is working
                 }
                 catch (Exception ex)
                 {

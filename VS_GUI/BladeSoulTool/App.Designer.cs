@@ -42,10 +42,11 @@
             this.tabControl.Controls.Add(this.tabAttach);
             this.tabControl.Controls.Add(this.tabWeapon);
             this.tabControl.Controls.Add(this.tabUtil);
-            this.tabControl.Location = new System.Drawing.Point(4, 3);
+            this.tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabControl.Location = new System.Drawing.Point(0, 0);
             this.tabControl.Name = "tabControl";
             this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(1185, 760);
+            this.tabControl.Size = new System.Drawing.Size(1192, 830);
             this.tabControl.TabIndex = 0;
             // 
             // tabCostume
@@ -53,7 +54,7 @@
             this.tabCostume.Location = new System.Drawing.Point(4, 22);
             this.tabCostume.Name = "tabCostume";
             this.tabCostume.Padding = new System.Windows.Forms.Padding(3);
-            this.tabCostume.Size = new System.Drawing.Size(1177, 734);
+            this.tabCostume.Size = new System.Drawing.Size(1184, 804);
             this.tabCostume.TabIndex = 0;
             this.tabCostume.UseVisualStyleBackColor = true;
             // 
@@ -62,7 +63,7 @@
             this.tabAttach.Location = new System.Drawing.Point(4, 22);
             this.tabAttach.Name = "tabAttach";
             this.tabAttach.Padding = new System.Windows.Forms.Padding(3);
-            this.tabAttach.Size = new System.Drawing.Size(1177, 734);
+            this.tabAttach.Size = new System.Drawing.Size(1177, 797);
             this.tabAttach.TabIndex = 1;
             this.tabAttach.UseVisualStyleBackColor = true;
             // 
@@ -71,7 +72,7 @@
             this.tabWeapon.Location = new System.Drawing.Point(4, 22);
             this.tabWeapon.Name = "tabWeapon";
             this.tabWeapon.Padding = new System.Windows.Forms.Padding(3);
-            this.tabWeapon.Size = new System.Drawing.Size(1177, 734);
+            this.tabWeapon.Size = new System.Drawing.Size(1177, 797);
             this.tabWeapon.TabIndex = 2;
             this.tabWeapon.UseVisualStyleBackColor = true;
             // 
@@ -80,15 +81,15 @@
             this.tabUtil.Location = new System.Drawing.Point(4, 22);
             this.tabUtil.Name = "tabUtil";
             this.tabUtil.Padding = new System.Windows.Forms.Padding(3);
-            this.tabUtil.Size = new System.Drawing.Size(1177, 734);
+            this.tabUtil.Size = new System.Drawing.Size(1177, 797);
             this.tabUtil.TabIndex = 3;
             this.tabUtil.UseVisualStyleBackColor = true;
             // 
             // App
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1192, 766);
+            this.ClientSize = new System.Drawing.Size(1192, 830);
             this.Controls.Add(this.tabControl);
             this.Name = "App";
             this.tabControl.ResumeLayout(false);

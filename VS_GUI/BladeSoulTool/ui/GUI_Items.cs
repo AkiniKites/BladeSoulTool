@@ -626,7 +626,11 @@ namespace BladeSoulTool.ui
 
         private void LoadOriginAndTargetIconPic(PictureBox picture, JObject elementData, bool async = false)
         {
-            var cachePath = BstManager.GetIconPicTmpPath(elementData);
+            var cachePath = BstManager.GetIconPath(elementData);
+            if(!File.Exists(cachePath))
+            {
+                cachePath = BstManager.GetIconPath(elementData, false);
+            }
             if (async)
             {
                 MethodInvoker picUpdate = delegate
@@ -637,7 +641,7 @@ namespace BladeSoulTool.ui
                     }
                     else
                     {
-                        picture.ImageLocation = BstManager.GetIconPicUrl(elementData);
+                        picture.ImageLocation = BstManager.PathErrorIcon;
                     }
                     picture.Load();
                 };
@@ -651,7 +655,7 @@ namespace BladeSoulTool.ui
                 }
                 else
                 {
-                    picture.ImageLocation = BstManager.GetIconPicUrl(elementData);
+                    picture.ImageLocation = BstManager.PathErrorIcon;
                 }
                 picture.Load();
             }

@@ -153,10 +153,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="log\" />
-    <Folder Include="tmp\attach\" />
-    <Folder Include="tmp\costume\" />
-    <Folder Include="tmp\icon\" />
-    <Folder Include="tmp\weapon\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

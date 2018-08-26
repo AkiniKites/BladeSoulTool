@@ -142,48 +142,46 @@ namespace BladeSoulTool.ui
                 foreach (var element in data.Properties())
                 {
                     var elementData = (JObject) element.Value;
-                    var iconUrl = BstManager.GetIconPicUrl(elementData);
-                    var iconTmpPath = BstManager.GetIconPicTmpPath(elementData);
-                    var itemPicUrl = BstManager.GetItemPicUrl(Array.IndexOf(types, type), elementData);
-                    var itemPicTmpPath = BstManager.GetItemPicTmpPath(Array.IndexOf(types, type), elementData);
+                    var iconPath = BstManager.GetIconPath(elementData);
+                    var itemPicPath = BstManager.GetItemPicPath(Array.IndexOf(types, type), elementData);
 
-                    if (File.Exists(iconTmpPath))
+                    if (File.Exists(iconPath))
                     {
                         // 无需下载
-                        BstManager.ShowMsgInTextBox(this.textBoxOut, string.Format(this._i18N.LoadI18NValue("BstIconLoader", "iconDownloadSucceed"), iconUrl));
+                        BstManager.ShowMsgInTextBox(this.textBoxOut, string.Format(this._i18N.LoadI18NValue("BstIconLoader", "iconDownloadSucceed"), iconPath));
                     }
                     else
                     {
-                        var icon = BstManager.DownloadImageFile(iconUrl, iconTmpPath);
-                        if (icon == null)
+                        iconPath = BstManager.GetIconPath(elementData, false);
+                        if (iconPath == null)
                         {
                             // 下载失败
-                            BstManager.ShowMsgInTextBox(this.textBoxOut, string.Format(this._i18N.LoadI18NValue("BstIconLoader", "iconDownloadFailed"), iconUrl));
+                            BstManager.ShowMsgInTextBox(this.textBoxOut, string.Format(this._i18N.LoadI18NValue("BstIconLoader", "iconDownloadFailed"), iconPath));
                         }
                         else
                         {
                             // 下载成功
-                            BstManager.ShowMsgInTextBox(this.textBoxOut, string.Format(this._i18N.LoadI18NValue("BstIconLoader", "iconDownloadSucceed"), iconUrl));
+                            BstManager.ShowMsgInTextBox(this.textBoxOut, string.Format(this._i18N.LoadI18NValue("BstIconLoader", "iconDownloadSucceed"), iconPath));
                         }
                     }
 
-                    if (File.Exists(itemPicTmpPath))
+                    if (File.Exists(itemPicPath))
                     {
                         // 无需下载
-                        BstManager.ShowMsgInTextBox(this.textBoxOut, string.Format(this._i18N.LoadI18NValue("BstPicLoader", "picDownloadSucceed"), itemPicUrl));
+                        BstManager.ShowMsgInTextBox(this.textBoxOut, string.Format(this._i18N.LoadI18NValue("BstPicLoader", "picDownloadSucceed"), itemPicPath));
                     }
                     else
                     {
-                        var pic = BstManager.DownloadImageFile(itemPicUrl, itemPicTmpPath);
-                        if (pic == null)
+                        itemPicPath = BstManager.GetItemPicPath(Array.IndexOf(types, type), elementData, false);
+                        if (itemPicPath == null)
                         {
                             // 下载失败
-                            BstManager.ShowMsgInTextBox(this.textBoxOut, string.Format(this._i18N.LoadI18NValue("BstPicLoader", "picDownloadFailed"), itemPicUrl));
+                            BstManager.ShowMsgInTextBox(this.textBoxOut, string.Format(this._i18N.LoadI18NValue("BstPicLoader", "picDownloadFailed"), itemPicPath));
                         }
                         else
                         {
                             // 下载成功
-                            BstManager.ShowMsgInTextBox(this.textBoxOut, string.Format(this._i18N.LoadI18NValue("BstPicLoader", "picDownloadSucceed"), itemPicUrl));
+                            BstManager.ShowMsgInTextBox(this.textBoxOut, string.Format(this._i18N.LoadI18NValue("BstPicLoader", "picDownloadSucceed"), itemPicPath));
                         }
                     }
 

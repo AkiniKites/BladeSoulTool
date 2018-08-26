@@ -51,6 +51,9 @@ namespace BladeSoulTool.lib
         public const string PathConfig = "config/";
         public const string PathDatabase = "database/";
         public const string PathResources = "resources/";
+        
+        public const string PathPics = "pics/";
+        public const string PathPicsCPS = "pics-cps/";
 
         public const string PathJsonSettings = BstManager.PathRoot + BstManager.PathConfig + "setting.json";
         public const string PathJsonCostume = BstManager.PathRoot + BstManager.PathDatabase + "costume/data/data.json";
@@ -444,50 +447,30 @@ namespace BladeSoulTool.lib
             return name;
         }
 
-        public static string GetIconPicUrl(JObject elementData)
+        public static string GetIconPath(JObject elementData, bool compressed = true)
         {
             string path = null;
 
-            var iconPicName = (string) elementData["pic"];
+            var iconPicName = (string)elementData["pic"];
 
             if (!string.IsNullOrEmpty(iconPicName))
             {
-                path = BstManager.GithubRoot + BstManager.GithubBranch + "/" + BstManager.PathDatabase + "icon/png-cps/" + iconPicName;
-            }
-
-            return path;
-        }
-
-        public static string GetIconPicTmpPath(JObject elementData)
-        {
-            string path = null;
-
-            var iconPicName = (string) elementData["pic"];
-
-            if (!string.IsNullOrEmpty(iconPicName))
-            {
-                path = BstManager.PathVsRoot + BstManager.PathVsTmp + "icon/" + iconPicName;
+                path = BstManager.PathRoot + BstManager.PathDatabase + "icon/" + (compressed ? BstManager.PathPicsCPS: BstManager.PathPics) + iconPicName;
             }
             else
             {
-                path = BstManager.PathNoIcon; // 图片设置为空，说明该物品没有icon，直接给默认icon路径
+                // The picture is set to empty, indicating that the item does not have an icon, directly to the default icon path
+                path = BstManager.PathNoIcon;
             }
 
             return path;
         }
 
-        public static string GetItemPicUrl(int type, JObject elementData)
+        public static string GetItemPicPath(int type, JObject elementData, bool compressed = true)
         {
-            return BstManager.GithubRoot + BstManager.GithubBranch + "/" +
-                BstManager.PathDatabase + BstManager.GetTypeName(type) + "/pics-cps/" +
-                (string) elementData["core"] + "_" + (string) elementData["col"] + ".png";
-        }
-
-        public static string GetItemPicTmpPath(int type, JObject elementData)
-        {
-            return BstManager.PathVsRoot + BstManager.PathVsTmp +
-                BstManager.GetTypeName(type) + "/" +
-                (string) elementData["core"] + "_" + (string) elementData["col"] + ".png";
+            return BstManager.PathRoot + BstManager.PathDatabase +
+                BstManager.GetTypeName(type) + "/" + (compressed ? BstManager.PathPicsCPS : BstManager.PathPics) +
+                (string)elementData["core"] + "_" + (string)elementData["col"] + ".png";
         }
 
         public static string GetItemOriginJsonPath(int type)

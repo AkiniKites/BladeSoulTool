@@ -40,7 +40,7 @@ namespace BladeSoulTool
             // 初始化icon图片加载器
             var loader = BstIconLoader.Instance;
             // 检查新版本
-            this.CheckNewVersion();
+            //this.CheckNewVersion();
             // 检查游戏安装路径设置
             this.CheckBnsGamePath();
 

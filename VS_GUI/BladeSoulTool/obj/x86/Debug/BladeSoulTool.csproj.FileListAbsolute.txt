@@ -37,3 +37,17 @@ Z:\prog\nodejs\BladeSoulTool\VS_GUI\BladeSoulTool\obj\x86\Debug\GenerateResource
 Z:\prog\nodejs\BladeSoulTool\VS_GUI\BladeSoulTool\obj\x86\Debug\BladeSoulTool.exe
 Z:\prog\nodejs\BladeSoulTool\VS_GUI\BladeSoulTool\obj\x86\Debug\BladeSoulTool.pdb
 D:\WorkStation\BladeSoulTool\VS_GUI\BladeSoulTool\obj\x86\Debug\BladeSoulTool.csprojResolveAssemblyReference.cache
+D:\BladeSoulTool\VS_GUI\BladeSoulTool\obj\x86\Debug\BladeSoulTool.exe
+D:\BladeSoulTool\VS_GUI\BladeSoulTool\obj\x86\Debug\BladeSoulTool.pdb
+D:\BladeSoulTool\VS_GUI\BladeSoulTool\bin\Debug\BladeSoulTool.exe
+D:\BladeSoulTool\VS_GUI\BladeSoulTool\bin\Debug\BladeSoulTool.pdb
+D:\BladeSoulTool\VS_GUI\BladeSoulTool\bin\Debug\Newtonsoft.Json.dll
+D:\BladeSoulTool\VS_GUI\BladeSoulTool\bin\Debug\Newtonsoft.Json.pdb
+D:\BladeSoulTool\VS_GUI\BladeSoulTool\bin\Debug\Newtonsoft.Json.xml
+D:\BladeSoulTool\VS_GUI\BladeSoulTool\obj\x86\Debug\BladeSoulTool.csprojResolveAssemblyReference.cache
+D:\BladeSoulTool\VS_GUI\BladeSoulTool\obj\x86\Debug\BladeSoulTool.ui.GuiItems.resources
+D:\BladeSoulTool\VS_GUI\BladeSoulTool\obj\x86\Debug\BladeSoulTool.App.resources
+D:\BladeSoulTool\VS_GUI\BladeSoulTool\obj\x86\Debug\BladeSoulTool.Properties.Resources.resources
+D:\BladeSoulTool\VS_GUI\BladeSoulTool\obj\x86\Debug\BladeSoulTool.ui.GuiPicture.resources
+D:\BladeSoulTool\VS_GUI\BladeSoulTool\obj\x86\Debug\BladeSoulTool.ui.GuiUtil.resources
+D:\BladeSoulTool\VS_GUI\BladeSoulTool\obj\x86\Debug\BladeSoulTool.csproj.GenerateResource.Cache

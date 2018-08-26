@@ -71,9 +71,9 @@
             // 
             this.pictureBoxUmodel.BackColor = System.Drawing.SystemColors.Window;
             this.pictureBoxUmodel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pictureBoxUmodel.Location = new System.Drawing.Point(665, 130);
+            this.pictureBoxUmodel.Location = new System.Drawing.Point(665, 141);
             this.pictureBoxUmodel.Name = "pictureBoxUmodel";
-            this.pictureBoxUmodel.Size = new System.Drawing.Size(500, 600);
+            this.pictureBoxUmodel.Size = new System.Drawing.Size(500, 650);
             this.pictureBoxUmodel.TabIndex = 0;
             this.pictureBoxUmodel.TabStop = false;
             // 
@@ -86,12 +86,12 @@
             this.gridItems.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.gridItems.BackgroundColor = System.Drawing.SystemColors.Window;
             this.gridItems.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.gridItems.Location = new System.Drawing.Point(12, 130);
+            this.gridItems.Location = new System.Drawing.Point(12, 141);
             this.gridItems.MultiSelect = false;
             this.gridItems.Name = "gridItems";
             this.gridItems.RowTemplate.Height = 23;
             this.gridItems.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.gridItems.Size = new System.Drawing.Size(400, 514);
+            this.gridItems.Size = new System.Drawing.Size(400, 557);
             this.gridItems.TabIndex = 1;
             // 
             // labelRace
@@ -99,15 +99,15 @@
             this.labelRace.Location = new System.Drawing.Point(12, 5);
             this.labelRace.Name = "labelRace";
             this.labelRace.Padding = new System.Windows.Forms.Padding(0, 5, 0, 0);
-            this.labelRace.Size = new System.Drawing.Size(65, 20);
+            this.labelRace.Size = new System.Drawing.Size(65, 22);
             this.labelRace.TabIndex = 2;
             // 
             // comboBoxRace
             // 
             this.comboBoxRace.FormattingEnabled = true;
-            this.comboBoxRace.Location = new System.Drawing.Point(83, 6);
+            this.comboBoxRace.Location = new System.Drawing.Point(83, 7);
             this.comboBoxRace.Name = "comboBoxRace";
-            this.comboBoxRace.Size = new System.Drawing.Size(121, 20);
+            this.comboBoxRace.Size = new System.Drawing.Size(121, 21);
             this.comboBoxRace.TabIndex = 3;
             // 
             // panelTarget
@@ -118,16 +118,16 @@
             this.panelTarget.Controls.Add(this.pictureBoxOrigin);
             this.panelTarget.Controls.Add(this.textBoxOrigin);
             this.panelTarget.Controls.Add(this.labelOrigin);
-            this.panelTarget.Location = new System.Drawing.Point(14, 32);
+            this.panelTarget.Location = new System.Drawing.Point(14, 35);
             this.panelTarget.Name = "panelTarget";
-            this.panelTarget.Size = new System.Drawing.Size(547, 92);
+            this.panelTarget.Size = new System.Drawing.Size(547, 100);
             this.panelTarget.TabIndex = 4;
             // 
             // btnView2DOrigin
             // 
             this.btnView2DOrigin.Location = new System.Drawing.Point(452, 2);
             this.btnView2DOrigin.Name = "btnView2DOrigin";
-            this.btnView2DOrigin.Size = new System.Drawing.Size(42, 85);
+            this.btnView2DOrigin.Size = new System.Drawing.Size(42, 92);
             this.btnView2DOrigin.TabIndex = 4;
             this.btnView2DOrigin.UseVisualStyleBackColor = true;
             // 
@@ -135,7 +135,7 @@
             // 
             this.btnView3DOrigin.Location = new System.Drawing.Point(500, 2);
             this.btnView3DOrigin.Name = "btnView3DOrigin";
-            this.btnView3DOrigin.Size = new System.Drawing.Size(42, 85);
+            this.btnView3DOrigin.Size = new System.Drawing.Size(42, 92);
             this.btnView3DOrigin.TabIndex = 3;
             this.btnView3DOrigin.UseVisualStyleBackColor = true;
             // 
@@ -143,9 +143,9 @@
             // 
             this.pictureBoxOrigin.BackColor = System.Drawing.SystemColors.Window;
             this.pictureBoxOrigin.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pictureBoxOrigin.Location = new System.Drawing.Point(68, 12);
+            this.pictureBoxOrigin.Location = new System.Drawing.Point(68, 13);
             this.pictureBoxOrigin.Name = "pictureBoxOrigin";
-            this.pictureBoxOrigin.Size = new System.Drawing.Size(64, 64);
+            this.pictureBoxOrigin.Size = new System.Drawing.Size(64, 69);
             this.pictureBoxOrigin.TabIndex = 2;
             this.pictureBoxOrigin.TabStop = false;
             // 
@@ -157,15 +157,15 @@
             this.textBoxOrigin.Name = "textBoxOrigin";
             this.textBoxOrigin.ReadOnly = true;
             this.textBoxOrigin.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxOrigin.Size = new System.Drawing.Size(308, 84);
+            this.textBoxOrigin.Size = new System.Drawing.Size(308, 91);
             this.textBoxOrigin.TabIndex = 1;
             // 
             // labelOrigin
             // 
             this.labelOrigin.Location = new System.Drawing.Point(1, 2);
             this.labelOrigin.Name = "labelOrigin";
-            this.labelOrigin.Padding = new System.Windows.Forms.Padding(0, 22, 0, 0);
-            this.labelOrigin.Size = new System.Drawing.Size(61, 85);
+            this.labelOrigin.Padding = new System.Windows.Forms.Padding(0, 24, 0, 0);
+            this.labelOrigin.Size = new System.Drawing.Size(61, 92);
             this.labelOrigin.TabIndex = 0;
             // 
             // panelDest
@@ -176,16 +176,16 @@
             this.panelDest.Controls.Add(this.pictureBoxTarget);
             this.panelDest.Controls.Add(this.textBoxTarget);
             this.panelDest.Controls.Add(this.labelTarget);
-            this.panelDest.Location = new System.Drawing.Point(620, 32);
+            this.panelDest.Location = new System.Drawing.Point(620, 35);
             this.panelDest.Name = "panelDest";
-            this.panelDest.Size = new System.Drawing.Size(545, 92);
+            this.panelDest.Size = new System.Drawing.Size(545, 100);
             this.panelDest.TabIndex = 5;
             // 
             // btnView2DTarget
             // 
             this.btnView2DTarget.Location = new System.Drawing.Point(450, 2);
             this.btnView2DTarget.Name = "btnView2DTarget";
-            this.btnView2DTarget.Size = new System.Drawing.Size(42, 85);
+            this.btnView2DTarget.Size = new System.Drawing.Size(42, 92);
             this.btnView2DTarget.TabIndex = 7;
             this.btnView2DTarget.UseVisualStyleBackColor = true;
             // 
@@ -193,7 +193,7 @@
             // 
             this.btnView3DTarget.Location = new System.Drawing.Point(498, 2);
             this.btnView3DTarget.Name = "btnView3DTarget";
-            this.btnView3DTarget.Size = new System.Drawing.Size(42, 85);
+            this.btnView3DTarget.Size = new System.Drawing.Size(42, 92);
             this.btnView3DTarget.TabIndex = 6;
             this.btnView3DTarget.UseVisualStyleBackColor = true;
             // 
@@ -201,9 +201,9 @@
             // 
             this.pictureBoxTarget.BackColor = System.Drawing.SystemColors.Window;
             this.pictureBoxTarget.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pictureBoxTarget.Location = new System.Drawing.Point(70, 12);
+            this.pictureBoxTarget.Location = new System.Drawing.Point(70, 13);
             this.pictureBoxTarget.Name = "pictureBoxTarget";
-            this.pictureBoxTarget.Size = new System.Drawing.Size(64, 64);
+            this.pictureBoxTarget.Size = new System.Drawing.Size(64, 69);
             this.pictureBoxTarget.TabIndex = 5;
             this.pictureBoxTarget.TabStop = false;
             // 
@@ -215,34 +215,34 @@
             this.textBoxTarget.Name = "textBoxTarget";
             this.textBoxTarget.ReadOnly = true;
             this.textBoxTarget.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxTarget.Size = new System.Drawing.Size(304, 84);
+            this.textBoxTarget.Size = new System.Drawing.Size(304, 91);
             this.textBoxTarget.TabIndex = 4;
             // 
             // labelTarget
             // 
             this.labelTarget.Location = new System.Drawing.Point(3, 3);
             this.labelTarget.Name = "labelTarget";
-            this.labelTarget.Padding = new System.Windows.Forms.Padding(0, 22, 0, 0);
-            this.labelTarget.Size = new System.Drawing.Size(61, 85);
+            this.labelTarget.Padding = new System.Windows.Forms.Padding(0, 24, 0, 0);
+            this.labelTarget.Size = new System.Drawing.Size(61, 92);
             this.labelTarget.TabIndex = 1;
             // 
             // btnTopRestoreAll
             // 
             this.btnTopRestoreAll.Location = new System.Drawing.Point(714, 4);
             this.btnTopRestoreAll.Name = "btnTopRestoreAll";
-            this.btnTopRestoreAll.Size = new System.Drawing.Size(75, 23);
+            this.btnTopRestoreAll.Size = new System.Drawing.Size(75, 25);
             this.btnTopRestoreAll.TabIndex = 6;
             this.btnTopRestoreAll.UseVisualStyleBackColor = true;
             // 
             // textBoxOut
             // 
             this.textBoxOut.BackColor = System.Drawing.SystemColors.Window;
-            this.textBoxOut.Location = new System.Drawing.Point(12, 650);
+            this.textBoxOut.Location = new System.Drawing.Point(12, 704);
             this.textBoxOut.Multiline = true;
             this.textBoxOut.Name = "textBoxOut";
             this.textBoxOut.ReadOnly = true;
             this.textBoxOut.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.textBoxOut.Size = new System.Drawing.Size(647, 80);
+            this.textBoxOut.Size = new System.Drawing.Size(647, 86);
             this.textBoxOut.TabIndex = 8;
             // 
             // panelInfo
@@ -253,57 +253,57 @@
             this.panelInfo.Controls.Add(this.btnSelectOrigin);
             this.panelInfo.Controls.Add(this.textBoxInfo);
             this.panelInfo.Controls.Add(this.labelInfoHead);
-            this.panelInfo.Location = new System.Drawing.Point(418, 130);
+            this.panelInfo.Location = new System.Drawing.Point(418, 141);
             this.panelInfo.Name = "panelInfo";
-            this.panelInfo.Size = new System.Drawing.Size(241, 514);
+            this.panelInfo.Size = new System.Drawing.Size(241, 557);
             this.panelInfo.TabIndex = 9;
             // 
             // btnView3DInfo
             // 
-            this.btnView3DInfo.Location = new System.Drawing.Point(5, 415);
+            this.btnView3DInfo.Location = new System.Drawing.Point(5, 450);
             this.btnView3DInfo.Name = "btnView3DInfo";
-            this.btnView3DInfo.Size = new System.Drawing.Size(230, 23);
+            this.btnView3DInfo.Size = new System.Drawing.Size(230, 25);
             this.btnView3DInfo.TabIndex = 4;
             this.btnView3DInfo.UseVisualStyleBackColor = true;
             // 
             // btnSelectTarget
             // 
-            this.btnSelectTarget.Location = new System.Drawing.Point(5, 480);
+            this.btnSelectTarget.Location = new System.Drawing.Point(5, 520);
             this.btnSelectTarget.Name = "btnSelectTarget";
-            this.btnSelectTarget.Size = new System.Drawing.Size(230, 23);
+            this.btnSelectTarget.Size = new System.Drawing.Size(230, 25);
             this.btnSelectTarget.TabIndex = 3;
             this.btnSelectTarget.UseVisualStyleBackColor = true;
             // 
             // btnSelectOrigin
             // 
-            this.btnSelectOrigin.Location = new System.Drawing.Point(5, 448);
+            this.btnSelectOrigin.Location = new System.Drawing.Point(5, 485);
             this.btnSelectOrigin.Name = "btnSelectOrigin";
-            this.btnSelectOrigin.Size = new System.Drawing.Size(230, 23);
+            this.btnSelectOrigin.Size = new System.Drawing.Size(230, 25);
             this.btnSelectOrigin.TabIndex = 2;
             this.btnSelectOrigin.UseVisualStyleBackColor = true;
             // 
             // textBoxInfo
             // 
             this.textBoxInfo.BackColor = System.Drawing.SystemColors.Window;
-            this.textBoxInfo.Location = new System.Drawing.Point(5, 29);
+            this.textBoxInfo.Location = new System.Drawing.Point(5, 31);
             this.textBoxInfo.Multiline = true;
             this.textBoxInfo.Name = "textBoxInfo";
             this.textBoxInfo.ReadOnly = true;
-            this.textBoxInfo.Size = new System.Drawing.Size(230, 374);
+            this.textBoxInfo.Size = new System.Drawing.Size(230, 405);
             this.textBoxInfo.TabIndex = 1;
             // 
             // labelInfoHead
             // 
-            this.labelInfoHead.Location = new System.Drawing.Point(3, 9);
+            this.labelInfoHead.Location = new System.Drawing.Point(3, 10);
             this.labelInfoHead.Name = "labelInfoHead";
-            this.labelInfoHead.Size = new System.Drawing.Size(174, 17);
+            this.labelInfoHead.Size = new System.Drawing.Size(174, 18);
             this.labelInfoHead.TabIndex = 0;
             // 
             // btnReplace
             // 
-            this.btnReplace.Location = new System.Drawing.Point(567, 32);
+            this.btnReplace.Location = new System.Drawing.Point(567, 35);
             this.btnReplace.Name = "btnReplace";
-            this.btnReplace.Size = new System.Drawing.Size(46, 92);
+            this.btnReplace.Size = new System.Drawing.Size(46, 100);
             this.btnReplace.TabIndex = 10;
             this.btnReplace.UseVisualStyleBackColor = true;
             // 
@@ -311,7 +311,7 @@
             // 
             this.textBoxFilter.Location = new System.Drawing.Point(302, 5);
             this.textBoxFilter.Name = "textBoxFilter";
-            this.textBoxFilter.Size = new System.Drawing.Size(118, 21);
+            this.textBoxFilter.Size = new System.Drawing.Size(118, 20);
             this.textBoxFilter.TabIndex = 11;
             // 
             // labelFilter
@@ -319,14 +319,14 @@
             this.labelFilter.Location = new System.Drawing.Point(221, 5);
             this.labelFilter.Name = "labelFilter";
             this.labelFilter.Padding = new System.Windows.Forms.Padding(0, 5, 0, 0);
-            this.labelFilter.Size = new System.Drawing.Size(75, 20);
+            this.labelFilter.Size = new System.Drawing.Size(75, 22);
             this.labelFilter.TabIndex = 12;
             // 
             // btnFilter
             // 
             this.btnFilter.Location = new System.Drawing.Point(434, 4);
             this.btnFilter.Name = "btnFilter";
-            this.btnFilter.Size = new System.Drawing.Size(75, 23);
+            this.btnFilter.Size = new System.Drawing.Size(75, 25);
             this.btnFilter.TabIndex = 13;
             this.btnFilter.UseVisualStyleBackColor = true;
             // 
@@ -335,22 +335,23 @@
             this.labelRestore.Location = new System.Drawing.Point(620, 5);
             this.labelRestore.Name = "labelRestore";
             this.labelRestore.Padding = new System.Windows.Forms.Padding(0, 5, 0, 0);
-            this.labelRestore.Size = new System.Drawing.Size(88, 20);
+            this.labelRestore.Size = new System.Drawing.Size(88, 22);
             this.labelRestore.TabIndex = 14;
             // 
             // btnReportIssue
             // 
             this.btnReportIssue.Location = new System.Drawing.Point(1046, 4);
             this.btnReportIssue.Name = "btnReportIssue";
-            this.btnReportIssue.Size = new System.Drawing.Size(119, 23);
+            this.btnReportIssue.Size = new System.Drawing.Size(119, 25);
             this.btnReportIssue.TabIndex = 15;
             this.btnReportIssue.UseVisualStyleBackColor = true;
             // 
             // GuiItems
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1177, 742);
+            this.AutoSize = true;
+            this.ClientSize = new System.Drawing.Size(1177, 804);
             this.Controls.Add(this.btnReportIssue);
             this.Controls.Add(this.labelRestore);
             this.Controls.Add(this.btnFilter);
