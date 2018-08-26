@@ -33,4 +33,4 @@ VS_GUI/BladeSoulTool/tmp/weapon/*
 node_modules
 
 database/
-database_outdated/
+database_outofdate/
