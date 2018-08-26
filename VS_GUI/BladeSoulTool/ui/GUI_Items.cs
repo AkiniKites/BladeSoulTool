@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Specialized;
+using System;
 using System.Data;
 using System.IO;
-using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
@@ -122,8 +120,6 @@ namespace BladeSoulTool.ui
             this.btnSelectOrigin.Click += new EventHandler(this.btnSelectOrigin_Click);
             // 选为目标模型按钮
             this.btnSelectTarget.Click += new EventHandler(this.btnSelectTarget_Click);
-            // 报告bug按钮
-            this.btnReportIssue.Click += new EventHandler(this.btnReportIssue_Click);
         }
 
         private void GuiItems_Shown(object sender, EventArgs e)
@@ -323,101 +319,12 @@ namespace BladeSoulTool.ui
             }
         }
 
-        private void btnReportIssue_Click(Object sender, EventArgs e)
-        {
-            // 获得数据
-            var originInfo = this.textBoxOrigin.Text;
-            var targetInfo = this.textBoxTarget.Text;
-            var consoleInfo = this.textBoxOut.Text;
-
-            // 检查数据
-            if (string.IsNullOrEmpty(originInfo))
-            {
-                BstManager.DisplayErrorMessageBox(
-                    this._i18N.LoadI18NValue("GuiItems", "actionReportErrorTitle"),
-                    this._i18N.LoadI18NValue("GuiItems", "actionSelectOriginErrorMsg")
-                );
-                return;
-            }
-            if (string.IsNullOrEmpty(targetInfo))
-            {
-                BstManager.DisplayErrorMessageBox(
-                    this._i18N.LoadI18NValue("GuiItems", "actionReportErrorTitle"),
-                    this._i18N.LoadI18NValue("GuiItems", "actionSelectTargetErrorMsg")
-                );
-                return;
-            }
-            var hasGruntRunSign = false;
-            for (var lineNo = 0; lineNo < this.textBoxOut.Lines.Length; lineNo++)
-            {
-                var lineText = this.textBoxOut.Lines[lineNo];
-                if (lineText.Contains(BstManager.GruntRunSign))
-                {
-                    hasGruntRunSign = true;
-                    break;
-                }
-            }
-            if (!hasGruntRunSign)
-            {
-                BstManager.DisplayErrorMessageBox(
-                    this._i18N.LoadI18NValue("GuiItems", "actionReportErrorTitle"),
-                    this._i18N.LoadI18NValue("GuiItems", "actionReportErrorMsg")
-                );
-                return;
-            }
-
-            // 发送报告
-            using (var wb = new WebClient())
-            {
-                var data = new NameValueCollection();
-                data["origin"] = originInfo;
-                data["target"] = targetInfo;
-                data["console"] = consoleInfo;
-
-                var response = wb.UploadValues(BstManager.BstReportServerUrl, "POST", data);
-                var responseStr = System.Text.Encoding.ASCII.GetString(response, 0, response.Length);
-
-                if (Regex.IsMatch(responseStr, BstManager.BstReportAlreadyExists))
-                {
-                    responseStr = responseStr.Substring(3); // remove prefix "-3|"
-                    BstManager.DisplayInfoMessageBox(
-                        this._i18N.LoadI18NValue("GuiItems", "reportErrorTitle"),
-                        string.Format(this._i18N.LoadI18NValue("GuiItems", "reportAlreadyExists"), responseStr)
-                    );
-                }
-                else
-                {
-                    switch (responseStr)
-                    {
-                        case BstManager.BstReportMissingInfo:
-                            BstManager.DisplayErrorMessageBox(
-                                this._i18N.LoadI18NValue("GuiItems", "reportErrorTitle"),
-                                this._i18N.LoadI18NValue("GuiItems", "reportMissingInfo")
-                            );
-                            break;
-                        case BstManager.BstReportInvalidJson:
-                            BstManager.DisplayErrorMessageBox(
-                                this._i18N.LoadI18NValue("GuiItems", "reportErrorTitle"),
-                                this._i18N.LoadI18NValue("GuiItems", "reportInvalidJson")
-                            );
-                            break;
-                        default:
-                            BstManager.DisplayInfoMessageBox(
-                                this._i18N.LoadI18NValue("GuiItems", "reportSucceedTitle"),
-                                string.Format(this._i18N.LoadI18NValue("GuiItems", "reportSucceedMsg"), responseStr)
-                            );
-                            break;
-                    }
-                }
-            }
-        }
-
         private void btnTopRestoreAll_Click(Object sender, EventArgs e)
         {
             // 恢复全部模型
             if (BstManager.DisplayConfirmMessageBox(
-                this._i18N.LoadI18NValue("GuiItems", "actionConfirmTitle"),
-                this._i18N.LoadI18NValue("GuiItems", "actionRestoreMsg")) == DialogResult.OK)
+                this._i18N.LoadL10NValue("GuiItems", "actionConfirmTitle"),
+                this._i18N.LoadL10NValue("GuiItems", "actionRestoreMsg")) == DialogResult.OK)
             {
                 BstManager.Instance.RunGrunt(this.textBoxOut, "restore");
             }

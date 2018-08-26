@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
@@ -151,22 +151,21 @@ namespace BladeSoulTool
 
         private static Form CreateItemsForm(int type)
         {
-            Form form = new GuiItems(type);
-            form.TopLevel = false;
-            form.Visible = true;
-            form.FormBorderStyle = FormBorderStyle.None;
-            form.WindowState = FormWindowState.Maximized;
-
-            return form;
+            return App.CreateFormAttr(new GuiItems(type));
         }
 
         private static Form CreateUtilForm()
         {
-            Form form = new GuiUtil();
+            return App.CreateFormAttr(new GuiUtil());
+        }
+
+        private static Form CreateFormAttr(Form form)
+        {
             form.TopLevel = false;
             form.Visible = true;
             form.FormBorderStyle = FormBorderStyle.None;
             form.WindowState = FormWindowState.Maximized;
+            form.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Bottom | AnchorStyles.Right;
 
             return form;
         }

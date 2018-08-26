@@ -1,23 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
+using System;
 using System.IO;
-using System.Text;
-using System.Threading;
 using System.Windows.Forms;
 using BladeSoulTool.lib;
-using Newtonsoft.Json.Linq;
-using Timer = System.Timers.Timer;
 
 namespace BladeSoulTool.ui
 {
     public partial class GuiUtil : Form
     {
         private BstI18NLoader _i18N;
-
-        private Thread _loadingThread;
 
         public GuiUtil()
         {
@@ -32,9 +22,6 @@ namespace BladeSoulTool.ui
             this.labelSelectGameDir.Text = this._i18N.LoadI18NValue("GuiUtil", "labelSelectGameDir");
             this.btnSelectGameDir.Text = this._i18N.LoadI18NValue("GuiUtil", "btnSelectGameDir");
             this.labelSelectLang.Text = this._i18N.LoadI18NValue("GuiUtil", "labelSelectLang");
-            this.labelDownloadAll.Text = this._i18N.LoadI18NValue("GuiUtil", "labelDownloadAll");
-            this.btnDownloadAll.Text = this._i18N.LoadI18NValue("GuiUtil", "btnDownloadAll");
-            this.btnStopDownload.Text = this._i18N.LoadI18NValue("GuiUtil", "btnStopDownload");
         }
 
         private void Init()
@@ -54,14 +41,6 @@ namespace BladeSoulTool.ui
 
             // 选择游戏安装路径控件
             this.btnSelectGameDir.Click += new EventHandler(this.btnSelectGameDir_Click);
-
-            // 下载所有图片资源控件
-            this.btnDownloadAll.Click += new EventHandler(this.btnDownloadAll_Click);
-            this.btnStopDownload.Click += new EventHandler(this.btnStopDownload_Click);
-
-            // 进度条
-            this.progBarDownloadAll.Maximum = (BstManager.Instance.DataAttach.Count + BstManager.Instance.DataCostume.Count + BstManager.Instance.DataWeapon.Count) * 2;
-            this.progBarDownloadAll.Value = 0;
         }
 
         private void btnSelectGameDir_Click(Object sender, EventArgs e)

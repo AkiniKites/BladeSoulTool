@@ -1,6 +1,9 @@
 {
+    "Locale": {
+        "Name": "English (United States)"
+    },
     "Game": {
-        "raceNames": ["KunN", "JinF", "JinM", "GonF", "GonM", "Lyn"]
+        "raceNames": ["YunN", "JinF", "JinM", "GonF", "GonM", "Lyn"]
     },
     "App": {
         "tabCostume": "Costume",
