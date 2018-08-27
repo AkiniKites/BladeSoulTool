@@ -123,6 +123,7 @@ module.exports = function(grunt) {
                     "expand": true,
                     "src": [
                         "**", // including all files first
+                        "!database", // exclude the database, compress it separately
                         "!server", // exclude all server codes
                         "!**/.DS_Store", // exclude MAC Finder dirs
                         "!**/Thumbs.db", // exclude Thumbs.db files
@@ -153,6 +154,25 @@ module.exports = function(grunt) {
                         "!VS_GUI/BladeSoulTool/Properties", // exclude VS UI Properties
                         "!VS_GUI/BladeSoulTool/resources/wekeroad-ink.vssettings", // exclude resources
                         "!VS_GUI/BladeSoulTool/ui" // exclude VS UI ui
+                    ],
+                    "dest": "BladeSoulTool/"
+                }]
+            },
+            "database":{
+                "options": {
+                    "archive": "database.zip",
+                    "mode": "zip",
+                    "level": 9,
+                    "pretty": true
+                },
+                "files": [{
+                    "expand": true,
+                    "src": [
+                        "database/**", // only the database
+                        "!**/*.tga", // exclude all *.tga files
+                        "!**/*.log", // exclude all *.log files
+                        "!**/.DS_Store", // exclude MAC Finder dirs
+                        "!**/Thumbs.db", // exclude Thumbs.db files
                     ],
                     "dest": "BladeSoulTool/"
                 }]

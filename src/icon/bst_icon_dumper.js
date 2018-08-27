@@ -27,7 +27,7 @@ var BstIconDumper = function(grunt, done) {
 
     this.workingList = [];
 
-    this.statusErrorList = []; // 在tga转换png的过程中出错的图片名
+    this.statusErrorList = []; // The name of the image that was wrong during the conversion of png to tga
 
     this.statusTotalCount = 0;
     this.statusFinishedCount = 0;
@@ -41,7 +41,7 @@ BstIconDumper.prototype.start = function() {
     self.grunt.log.writeln('[BstIconDumper] Start to dump all icon resources ...');
     self.util.printHr();
 
-    // 解包icon的upk
+    // Unpacking icon upk
     self.grunt.log.writeln('[BstIconDumper] Umodel exporting ' + BstConst.ICON_UPK_ID + '.upk ...');
 
     var iconUpkPath = self.util.findUpkPath(BstConst.ICON_UPK_ID);
@@ -63,22 +63,22 @@ BstIconDumper.prototype.start = function() {
 BstIconDumper.prototype.process = function() {
     var self = this;
 
-    // 清理tga拷贝文件夹
+    // Clean up tga copy folder
     if (self.grunt.file.exists(BstConst.PATH_ICON_TGA)) {
         self.grunt.log.writeln('[BstIconDumper] Clear previous tga outputs ...');
         self.util.deleteDir(BstConst.PATH_ICON_TGA);
         self.util.mkdir(BstConst.PATH_ICON_TGA);
+    } else {
+        self.util.mkdir(BstConst.PATH_ICON_TGA);
     }
 
-    // 拷贝tga文件到database文件夹
+    // Copy the tga file to the database folder
     self.grunt.log.writeln('[BstIconDumper] Copying all tga icon resources from output dir to database dir ...');
     self.grunt.file.recurse(
         './resources/umodel/output/' + BstConst.ICON_UPK_ID + '/Texture2D',
         function(abspath, rootdir, subdir, filename) {
-            if ((filename.match(/^attach.+/i) !== null // 装饰品icon
-                || filename.match(/^costume.+/i) !== null // 时装icon
-                || (filename.match(/^weapon.+/i) !== null && filename.match(/^Weapon_Lock.+/i) === null) // 有效的武器icon
-                ) && filename.match(/_\d+.png$/) === null) { // 且icon文件名不可以是..._2.png这样的格式，这种格式一般是无意义的，忽略
+            // new regex ^([a-z]{2,4}_(cash_)?)?(attach|costume|weapon_[a-z]{2}|wing|cat_(acc|cloth|hat))_
+            if (filename.match(/^([a-z]{2,4}_(cash_)?)?(attach|costume|weapon_[a-z]{2}|wing|cat_(acc|cloth|hat))_.*/i) !== null ) {
                 self.workingList.push(filename);
                 self.util.copyFile(abspath, path.join(BstConst.PATH_ICON_TGA, filename));
             }
@@ -87,6 +87,7 @@ BstIconDumper.prototype.process = function() {
     self.statusTotalCount = self.workingList.length;
     self.grunt.log.writeln('[BstIconDumper] Copying all tga done ...');
 
+    return;
     // 清理png文件输出文件夹
     if (self.grunt.file.exists(BstConst.PATH_ICON_PNG)) {
         self.grunt.log.writeln('[BstIconDumper] Clear previous png outputs ...');
