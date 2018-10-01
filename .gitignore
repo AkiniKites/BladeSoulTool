@@ -32,5 +32,4 @@ VS_GUI/BladeSoulTool/tmp/icon/*
 VS_GUI/BladeSoulTool/tmp/weapon/*
 node_modules
 
-database/
-database_outofdate/
+database*/
