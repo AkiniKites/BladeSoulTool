@@ -238,6 +238,8 @@
             // 
             // textBoxOut
             // 
+            this.textBoxOut.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.textBoxOut.BackColor = System.Drawing.SystemColors.Window;
             this.textBoxOut.Location = new System.Drawing.Point(12, 704);
             this.textBoxOut.Multiline = true;

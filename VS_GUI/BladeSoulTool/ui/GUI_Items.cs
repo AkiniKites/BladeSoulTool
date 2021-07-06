@@ -325,7 +325,7 @@ namespace BladeSoulTool.ui
                 this._i18N.LoadI18NValue("GuiItems", "actionConfirmTitle"),
                 this._i18N.LoadI18NValue("GuiItems", "actionRestoreMsg")) == DialogResult.OK)
             {
-                BstManager.Instance.RunGrunt(this.textBoxOut, "restore");
+                BstManager.Instance.RunGrunt(this.textBoxOut, true, "restore");
             }
         }
 
@@ -354,7 +354,7 @@ namespace BladeSoulTool.ui
                 );
                 return;
             }
-            BstManager.Instance.RunGrunt(this.textBoxOut, "upk_viewer", new string[]
+            BstManager.Instance.RunGrunt(this.textBoxOut, false, "upk_viewer", new string[]
             {
                 "--part=" + BstManager.GetTypeName(this._formType),
                 "--model=" + this._originElementId
@@ -386,7 +386,7 @@ namespace BladeSoulTool.ui
                 );
                 return;
             }
-            BstManager.Instance.RunGrunt(this.textBoxOut, "upk_viewer", new string[]
+            BstManager.Instance.RunGrunt(this.textBoxOut, false, "upk_viewer", new string[]
             {
                 "--part=" + BstManager.GetTypeName(this._formType),
                 "--model=" + this._targetElementId
@@ -439,7 +439,7 @@ namespace BladeSoulTool.ui
                 {
                     race = BstManager.Instance.RaceTypes[this.comboBoxRace.SelectedIndex];
                 }
-                BstManager.Instance.RunGrunt(this.textBoxOut, "replace", new string[]
+                BstManager.Instance.RunGrunt(this.textBoxOut, false, "replace", new string[]
                 {
                     "--part=" + BstManager.GetTypeName(this._formType),
                     "--model=" + this._targetElementId,
@@ -459,7 +459,7 @@ namespace BladeSoulTool.ui
                 );
                 return;
             }
-            BstManager.Instance.RunGrunt(this.textBoxOut, "upk_viewer", new string[]
+            BstManager.Instance.RunGrunt(this.textBoxOut, false, "upk_viewer", new string[]
             {
                 "--part=" + BstManager.GetTypeName(this._formType),
                 "--model=" + this._selectedElementId

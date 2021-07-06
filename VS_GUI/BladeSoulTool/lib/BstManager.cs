@@ -492,7 +492,7 @@ namespace BladeSoulTool.lib
             }
         }
 
-        public void RunGrunt(TextBox box, string task = "", string[] args = null)
+        public void RunGrunt(TextBox box, bool showMessage, string task = "", string[] args = null)
         {
             if (this._isGruntRunning)
             {
@@ -525,10 +525,13 @@ namespace BladeSoulTool.lib
                 proc.StartInfo.RedirectStandardOutput = true;
 
                 proc.EnableRaisingEvents = true;
-                proc.Exited += (es, ee) => BstManager.DisplayInfoMessageBox(
-                    BstI18NLoader.Instance.LoadI18NValue("BstManager", "gruntResultTitle"),
-                    BstI18NLoader.Instance.LoadI18NValue("BstManager", "gruntResultMsg")
-                );
+                if (showMessage)
+                {
+                    proc.Exited += (es, ee) => BstManager.DisplayInfoMessageBox(
+                        BstI18NLoader.Instance.LoadI18NValue("BstManager", "gruntResultTitle"),
+                        BstI18NLoader.Instance.LoadI18NValue("BstManager", "gruntResultMsg")
+                    );
+                }
 
                 proc.OutputDataReceived += (dataSender, dataE) => BstManager.ShowMsgInTextBox(box, dataE.Data); // 注册输出接收事件
                 proc.Start(); // 启动
