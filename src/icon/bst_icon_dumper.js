@@ -4,6 +4,7 @@ var fs = require('fs');
 var cp = require('child_process');
 var path = require('path');
 var _ = require('underscore');
+const tga2png = require('tga2png');
 
 /**
  * @type {BstUtil|exports}
@@ -87,7 +88,6 @@ BstIconDumper.prototype.process = function() {
     self.statusTotalCount = self.workingList.length;
     self.grunt.log.writeln('[BstIconDumper] Copying all tga done ...');
 
-    return;
     // 清理png文件输出文件夹
     if (self.grunt.file.exists(BstConst.PATH_ICON_PNG)) {
         self.grunt.log.writeln('[BstIconDumper] Clear previous png outputs ...');
@@ -97,12 +97,12 @@ BstIconDumper.prototype.process = function() {
         self.util.mkdir(BstConst.PATH_ICON_PNG);
     }
 
+    for (const tgaFileName of self.workingList) {
+        self.processTgaConvert(tgaFileName);
+    }
+    
     // 开始将tga转成png，方便预览
     var workingTimer = setInterval(function() {
-        if (self.statusWorkingChildProcess < self.childProcess // 有空余的进程数
-            && self.workingList.length > 0) { // 队列中仍旧有任务需要安排
-            self.processTgaConvert(self.workingList.shift());
-        }
         if (self.statusFinishedCount >= self.statusTotalCount) {
             clearInterval(workingTimer);
             if (self.statusErrorList.length > 0) {
@@ -113,7 +113,13 @@ BstIconDumper.prototype.process = function() {
             }
             self.grunt.log.writeln('[BstIconDumper] Clear umodel output dir ...');
             self.util.deleteDir(path.join(self.gruntWorkingPath, 'resources/umodel/output', BstConst.ICON_UPK_ID));
+            
+            self.grunt.log.writeln('[BstIconDumper] Clear tga file dir ...');
+            if (self.grunt.file.exists(BstConst.PATH_ICON_TGA)) {
+                self.util.deleteDir(BstConst.PATH_ICON_TGA);
+            }
             self.grunt.log.writeln('[BstIconDumper] All works done ...');
+
             self.taskDone();
         }
     }, self.cycleInterval);
@@ -125,19 +131,17 @@ BstIconDumper.prototype.processTgaConvert = function(tgaFileName) {
     self.startConvert(tgaFileName);
 
     var tgaFilePath = path.join(BstConst.PATH_ICON_TGA, tgaFileName);
-    cp.exec(
-        'tga2pngcmd.exe -c ' + tgaFilePath + ' ' + BstConst.PATH_ICON_PNG,
-        {"cwd": './resources/tga2png'},
-        function(error, stdout) {
-            if (error) {
-                self.grunt.log.error('[BstIconDumper] Error in converting tga file ' + tgaFileName + ': ' + error.stack);
-                self.statusErrorList.push(tgaFileName);
-            } else if (stdout === '') {
-                self.grunt.log.error('[BstIconDumper] Error in converting tga file ' + tgaFileName + ', empty output ...');
-            }
-            self.finishConvert(tgaFileName);
-        }
-    );
+    
+    const basename = path.basename(tgaFileName, path.extname(tgaFileName))
+    const pngFilePath = path.join(BstConst.PATH_ICON_PNG, path.dirname(tgaFileName), basename + '.png');
+
+    tga2png(tgaFilePath, pngFilePath).then(buf => {
+        self.finishConvert(tgaFileName);
+    }, err => {
+        self.grunt.log.error('[BstIconDumper] Error in converting tga file ' + tgaFileName + ': ' + err);
+        self.statusErrorList.push(tgaFileName);
+        self.finishConvert(tgaFileName);
+    });
 };
 
 BstIconDumper.prototype.startConvert = function(tgaFileName) {
