@@ -295,7 +295,7 @@ BstUpkParser.prototype.preProcessIcon = function() {
     self.grunt.log.writeln('[BstUpkParser] Pre process icon files ...');
     self.util.printHr();
 
-    self.grunt.file.recurse(BstConst.PATH_ICON_PNG_CPS, function(abspath, rootdir, subdir, filename) {
+    self.grunt.file.recurse(BstConst.PATH_ICON_PNG, function(abspath, rootdir, subdir, filename) {
         var iconType = null;
         if (filename.match(/^attach.+/i)) {
             iconType = 'attach';
