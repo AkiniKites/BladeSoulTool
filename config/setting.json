@@ -1,6 +1,6 @@
 {
   "path": {
-    "game": "C:\\Games\\BnS",
+    "game": "E:\\Games\\NCSOFT\\BNS",
     "bns": "contents\\bns\\CookedPC",
     "data": "contents\\Local\\NCWEST\\data",
     "tencent": "contents\\Local\\NCWEST\\ENGLISH\\CookedPC",
@@ -16,19 +16,19 @@
   },
   "upk_scanner": {
     "childProcess": 30,
-    "cycleInterval": 200
+    "cycleInterval": 10
   },
   "umodel_shooter": {
     "interval": 3000
   },
   "icon_dumper": {
-    "childProcess": 5,
-    "cycleInterval": 1500
+    "childProcess": 10,
+    "cycleInterval": 100
   },
   "png_optimizer": {
     "options": {
-      "childProcess": 15,
-      "cycleInterval": 300
+      "childProcess": 30,
+      "cycleInterval": 10
     },
     "tasks": {
       "icon": {
