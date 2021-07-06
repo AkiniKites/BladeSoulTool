@@ -1,4 +1,4 @@
-.idea
+﻿.idea
 Thumbs.db
 npm-debug.log
 working/*.upk
@@ -31,3 +31,5 @@ VS_GUI/BladeSoulTool/tmp/costume/*
 VS_GUI/BladeSoulTool/tmp/icon/*
 VS_GUI/BladeSoulTool/tmp/weapon/*
 node_modules
+
+database*/

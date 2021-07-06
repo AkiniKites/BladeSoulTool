@@ -1,3 +1,3 @@
 @echo off
 
-grunt build_shot --stack --verbose & pause > nul
+grunt icon_dumper --stack --verbose & pause > nul

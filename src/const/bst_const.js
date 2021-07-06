@@ -68,7 +68,8 @@ BstConst.HAIR_UPK_SPECIAL_CORES = [
     'JinM_029', 'JinF_023', 'JinF_020', 'GonF_010', 'KunN_014'
 ];
 BstConst.HAIR_UPK_CORE_PREFIX = 'Hair_';
-BstConst.UPK_REPLACE_SHORT_TO_LONG_LIMIT = 8; // upk内容短改长的极限长度，因为是使用当前upk文件名进行短改长的补足，所以最多就8位长度
+// The upk content is shortened to the long limit length, because it is the shortest change length of the current upk file name, so the maximum length is 8 bits.
+BstConst.UPK_REPLACE_SHORT_TO_LONG_LIMIT = 8;
 BstConst.UPK_CORE_PHYSICS_SUFFIX = '_Physics';
 BstConst.UPK_HEX_STR_NULL = '00';
 
@@ -96,13 +97,13 @@ BstConst.UPK_INVALID_TEXTURE_UPK_IDS = [
 ];
 
 /**
- * 某些特殊的材质upk文件，里面引用了多个贴图upk文件，
- * 且，最主要的贴图upk文件可能还放在某些不是很重要的贴图upk文件的下面，
- * 解析的时候是取第一个出现的贴图upk文件，所以就会出现某些材质upk和贴图upk文件关联错误的情况，
- * 在raw_texture.json里的部分贴图可能多出一些材质，而部分贴图可能完全没有材质，
- * 这个配置就是进行特例描述，将部分特例进行预配置
- * 具体例子参考：骨骼：00022166，贴图：00022167，材质：00022168
- * 该配置的结构基本上和 raw_material.json 里相同：
+ * Some special material upk files, which reference multiple texture upk files,
+ * And, the main texture upk file may also be placed under some of the less important texture upk files.
+ * When parsing, the first uploaded upk file appears, so some material upk and texture upk file association errors will occur.
+ * Some textures in raw_texture.json may have some more material, and some textures may have no material at all.
+ * This configuration is a special case description, some of the special cases are pre-configured
+ * Specific examples reference: bone: 00022166, texture: 00022167, material: 00022168
+ * The structure of this configuration is basically the same as in raw_material.json:
  * {
  *     "00022168": {
  *         "col": "col1",
@@ -153,11 +154,11 @@ BstConst.UPK_PRE_DEFINED_MATERIAL_INFO = {
 };
 
 /**
- * 某些特殊的贴图upk文件，其文件描述可能是贴图（MaterialInstanceConstant），
- * 但其实其职责是贴图，遇到这样的情况，在一开始骨骼分类的时候这个upk文件就已经被分到材质部分去了，
- * 于是模型解析的时候就会找不到贴图，这个配置就是进行特例描述，将部分特例进行预配置
- * 具体例子参考：骨骼：00013151，贴图：00013149，材质：00013150
- * 该配置的结构基本上和 raw_texture.json 里相同：
+ * Some special texture upk files, whose file description may be texture instance (MaterialInstanceConstant),
+ * But in fact, its role is to map, in this case, the upk file has been assigned to the material part at the beginning of the bone classification,
+ * When the model is parsed, the texture will not be found. This configuration is a special case description, and some special cases are pre-configured.
+ * Specific examples reference: bone: 00011151, texture: 00013149, material: 00013150
+ * The structure of this configuration is basically the same as in raw_texture.json:
  * {
  *     "00013149": {
  *         "objs": [

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -52,33 +52,30 @@ namespace BladeSoulTool.lib
         public const string PathDatabase = "database/";
         public const string PathResources = "resources/";
 
-        public const string PathJsonSettings = BstManager.PathRoot + BstManager.PathConfig + "setting.json";
-        public const string PathJsonCostume = BstManager.PathRoot + BstManager.PathDatabase + "costume/data/data.json";
-        public const string PathJsonCostumeInvalid = BstManager.PathRoot + BstManager.PathDatabase + "costume/data/data_invalid.json";
-        public const string PathJsonAttach = BstManager.PathRoot + BstManager.PathDatabase + "attach/data/data.json";
-        public const string PathJsonAttachInvalid = BstManager.PathRoot + BstManager.PathDatabase + "attach/data/data_invalid.json";
-        public const string PathJsonWeapon = BstManager.PathRoot + BstManager.PathDatabase + "weapon/data/data.json";
-        public const string PathJsonWeaponInvalid = BstManager.PathRoot + BstManager.PathDatabase + "weapon/data/data_invalid.json";
-
         public const string PathVsRoot = "../../";
         public const string PathVsLog = "log/";
-        public const string PathVsTmp = "tmp/";
         public const string PathVsConfig = "config/";
+        public const string PathVsLocales = "locale/";
+
+        public const string PathJsonSettings = BstManager.PathRoot + BstManager.PathConfig + "setting.json";
+        public const string PathI18N = BstManager.PathVsRoot + BstManager.PathVsLocales;
+
+        public const string PathDataCostume = BstManager.PathRoot + BstManager.PathDatabase + "costume/data/";
+        public const string PathDataAttach = BstManager.PathRoot + BstManager.PathDatabase + "attach/data/";
+        public const string PathDataWeapon = BstManager.PathRoot + BstManager.PathDatabase + "weapon/data/";
+
+        public const string FileJsonData = "data.json";
+        public const string FileJsonDataInvalid = "data_invalid.json";
+        public const string FileJsonOrigin = "origin.json";
 
         public const string PathLoadingGif = BstManager.PathRoot + BstManager.PathResources + "others/loading.gif";
         public const string PathNoIcon = BstManager.PathRoot + BstManager.PathResources + "others/no_icon_64x64.png";
         public const string PathErrorIcon = BstManager.PathRoot + BstManager.PathResources + "others/error_icon_64x64.png";
 
-        public const string GithubRoot = "https://raw.githubusercontent.com/agreatfool/BladeSoulTool/";
+        public const string GithubRoot = "https://raw.githubusercontent.com/daniels1989/BladeSoulTool/";
         public const string GithubBranch = "master";
-
-        public const string GithubVersionTxt = BstManager.GithubRoot + BstManager.GithubBranch + "/VERSION.txt";
-
-        public const string ReleaseUrl17173 = "http://bbs.17173.com/thread-8018028-1-1.html";
-
-        public const string PathI18N = BstManager.PathVsRoot + BstManager.PathVsConfig + "i18n-";
-
-        public const string BstReportServerUrl = "http://bst.xenojoshua.com/issues/new";
+        public const string GithubVersionTxt = BstManager.GithubRoot + BstManager.GithubBranch + "/VERSION.txt";        
+        
         public const string GruntRunSign = "Grunt and task output will also be logged to";
         public const string BstReportMissingInfo = "-1";
         public const string BstReportInvalidJson = "-2";
@@ -108,12 +105,12 @@ namespace BladeSoulTool.lib
         private void Init()
         {
             this.SystemSettings = BstManager.ReadJsonFile(BstManager.PathJsonSettings);
-            this.DataCostume = BstManager.ReadJsonFile(BstManager.PathJsonCostume);
-            this.DataCostumeInvalid = BstManager.ReadJsonFile(BstManager.PathJsonCostumeInvalid);
-            this.DataAttach = BstManager.ReadJsonFile(BstManager.PathJsonAttach);
-            this.DataAttachInvalid = BstManager.ReadJsonFile(BstManager.PathJsonAttachInvalid);
-            this.DataWeapon = BstManager.ReadJsonFile(BstManager.PathJsonWeapon);
-            this.DataWeaponInvalid = BstManager.ReadJsonFile(BstManager.PathJsonWeaponInvalid);
+            this.DataCostume = BstManager.ReadJsonFile(BstManager.PathDataCostume + BstManager.FileJsonData);
+            this.DataCostumeInvalid = BstManager.ReadJsonFile(BstManager.PathDataCostume + BstManager.FileJsonDataInvalid);
+            this.DataAttach = BstManager.ReadJsonFile(BstManager.PathDataAttach + BstManager.FileJsonData);
+            this.DataAttachInvalid = BstManager.ReadJsonFile(BstManager.PathDataAttach + BstManager.FileJsonDataInvalid);
+            this.DataWeapon = BstManager.ReadJsonFile(BstManager.PathDataWeapon + BstManager.FileJsonData);
+            this.DataWeaponInvalid = BstManager.ReadJsonFile(BstManager.PathDataWeapon + BstManager.FileJsonDataInvalid);
 
             var lang = (string) this.SystemSettings["lang"];
             this.DataI18N = BstManager.ReadJsonFile(BstManager.PathI18N + lang + ".json");
@@ -132,12 +129,12 @@ namespace BladeSoulTool.lib
             this.LanguageNames = new List<string>();
             this.LanguageNames.AddRange(new String[]
             {
-                "简体中文", "English"
+                "English", "简体中文"
             });
             this.LanguageTypes = new List<string>();
             this.LanguageTypes.AddRange(new String[]
             {
-                "zh_CN", "en_US"
+                "en_US", "zh_CN" 
             });
 
             this.LoadingGifBytes = BstManager.GetBytesFromFile(BstManager.PathLoadingGif);
@@ -147,7 +144,11 @@ namespace BladeSoulTool.lib
 
         public static JObject ReadJsonFile(string path)
         {
-            var content = (JObject) JToken.ReadFrom(new JsonTextReader(File.OpenText(path)));
+            if(!File.Exists(path))
+            {
+                File.WriteAllText(path, "{}");
+            } 
+            var content = (JObject)JToken.ReadFrom(new JsonTextReader(File.OpenText(path)));
             BstLogger.Instance.Log("Json file loaded: " + path);
 
             return content;
@@ -232,19 +233,7 @@ namespace BladeSoulTool.lib
                 BstLogger.Instance.Log(ex.ToString());
             }
         }
-
-        public static byte[] DownloadImageFile(string url, string path)
-        {
-            var blob = BstManager.GetBytesFromWeb(url);
-            if (blob == null)
-            {
-                return null; // 下载失败
-            }
-            BstManager.WriteByteArrayToFile(path, blob);
-
-            return blob;
-        }
-
+        
         public static void DisplayErrorMessageBox(string boxTitle, string boxMsg)
         {
             try {
@@ -397,10 +386,10 @@ namespace BladeSoulTool.lib
 
         public static byte[] GetBytesFromFile(string path)
         {
-            FileStream fs = null;
             if (!File.Exists(path)) {
                 return null; // 文件未找到，直接返回null
             }
+            FileStream fs = null;
 
             try
             {
@@ -444,50 +433,34 @@ namespace BladeSoulTool.lib
             return name;
         }
 
-        public static string GetIconPicUrl(JObject elementData)
+        public static string GetIconPath(JObject elementData, bool compressed = true)
         {
             string path = null;
 
-            var iconPicName = (string) elementData["pic"];
+            var iconPicName = (string)elementData["pic"];
 
             if (!string.IsNullOrEmpty(iconPicName))
             {
-                path = BstManager.GithubRoot + BstManager.GithubBranch + "/" + BstManager.PathDatabase + "icon/png-cps/" + iconPicName;
-            }
-
-            return path;
-        }
-
-        public static string GetIconPicTmpPath(JObject elementData)
-        {
-            string path = null;
-
-            var iconPicName = (string) elementData["pic"];
-
-            if (!string.IsNullOrEmpty(iconPicName))
-            {
-                path = BstManager.PathVsRoot + BstManager.PathVsTmp + "icon/" + iconPicName;
+                path = BstManager.PathRoot + (compressed 
+                    ? (string) BstManager.Instance.SystemSettings["png_optimizer"]["tasks"]["icon"]["dest"]
+                    : (string) BstManager.Instance.SystemSettings["png_optimizer"]["tasks"]["icon"]["src"]
+                    ) + "/" + iconPicName;
             }
             else
             {
-                path = BstManager.PathNoIcon; // 图片设置为空，说明该物品没有icon，直接给默认icon路径
+                // The picture is set to empty, indicating that the item does not have an icon, directly to the default icon path
+                path = BstManager.PathNoIcon;
             }
 
             return path;
         }
 
-        public static string GetItemPicUrl(int type, JObject elementData)
+        public static string GetItemPicPath(int type, JObject elementData, bool compressed = true)
         {
-            return BstManager.GithubRoot + BstManager.GithubBranch + "/" +
-                BstManager.PathDatabase + BstManager.GetTypeName(type) + "/pics-cps/" +
-                (string) elementData["core"] + "_" + (string) elementData["col"] + ".png";
-        }
-
-        public static string GetItemPicTmpPath(int type, JObject elementData)
-        {
-            return BstManager.PathVsRoot + BstManager.PathVsTmp +
-                BstManager.GetTypeName(type) + "/" +
-                (string) elementData["core"] + "_" + (string) elementData["col"] + ".png";
+            return BstManager.PathRoot + (compressed 
+                ? (string)BstManager.Instance.SystemSettings["png_optimizer"]["tasks"][BstManager.GetTypeName(type)]["dest"]
+                : (string)BstManager.Instance.SystemSettings["png_optimizer"]["tasks"][BstManager.GetTypeName(type)]["src"]
+                ) + "/" + (string) elementData["core"] + "_" + (string) elementData["col"] + ".png";
         }
 
         public static string GetItemOriginJsonPath(int type)
