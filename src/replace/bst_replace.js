@@ -1,7 +1,6 @@
 "use strict";
 
 var path = require('path');
-var _ = require('underscore');
 
 /**
  * @type {BstUtil|exports}
@@ -39,7 +38,7 @@ BstReplace.prototype.start = function(part, race, modelId) {
 
     this.part = part;
     this.dataCollection = this.util.readJsonFile('./database/' + this.part + '/data/data.json');
-    this.modelIds = _.keys(this.dataCollection);
+    this.modelIds = Object.keys(this.dataCollection);
 
     // 确定替换目标模型数据
     if (!this.modelIds.indexOf(modelId)) {
@@ -116,11 +115,11 @@ BstReplace.prototype.processCostumeAndAttach = function() {
     self.grunt.log.writeln('[BstReplace] All upk files of target model found: ' + self.util.formatJson(paths));
 
     // 拷贝目标upk到working路径下，并重命名为原始模型的upk名
-    _.each(paths, function(copyPath, copyKey) {
+    for (const [copyKey, copyPath] of Object.entries(paths)) {
         var workingPath = path.join('working', self.originModelInfo[copyKey] + '.upk');
         self.util.copyFile(copyPath, workingPath);
         paths[copyKey] = workingPath;
-    });
+    }
     self.util.printHr();
 
     // 检查原始模型为多色的情况
@@ -131,22 +130,22 @@ BstReplace.prototype.processCostumeAndAttach = function() {
         // 是多色
         self.grunt.log.writeln('[BstReplace] Origin model is multi color status, col: ' + self.originModelInfo['col']);
         // 查找相同core的模型
-        var filtered = _.filter(self.dataCollection, function(element) { // filtered里面肯定有东西，至少原始模型自己在里面
+        var filtered = Object.values(self.dataCollection).filter(function(element) { // filtered里面肯定有东西，至少原始模型自己在里面
             return element['core'] === self.originModelInfo['core'];
         });
-        _.each(filtered, function(element) {
+        for (const element of filtered) {
             if (element['material'] !== self.originModelInfo['material']) { // 非当前原始模型
                 multiColMaterialIds[element['col']] = element['material'];
             }
-        });
+        }
         self.grunt.log.writeln('[BstReplace] Origin model related other col materials: ' + self.util.formatJson(multiColMaterialIds));
-        multiColMaterialIds = _.values(multiColMaterialIds); // 重新获取所有的路径，后续工作只需要路径
+        multiColMaterialIds = Object.values(multiColMaterialIds); // 重新获取所有的路径，后续工作只需要路径
         // 拷贝并重命名目标模型材质文件为原始模型的多色材质名
         var targetMaterialPath = self.util.findUpkPath(self.targetModelInfo['material']); // 路径在之前已经验证过了，这里不需要再验证
-        _.each(multiColMaterialIds, function(multiMaterialUpkId) {
+        for (const multiMaterialUpkId of multiColMaterialIds) {
             var workingPath = path.join('working', multiMaterialUpkId + '.upk');
             self.util.copyFile(targetMaterialPath, workingPath);
-        });
+        }
         self.util.printHr();
     }
 
@@ -157,7 +156,7 @@ BstReplace.prototype.processCostumeAndAttach = function() {
         }
         self.util.registerAsyncEvent(paths[editKey]);
         self.util.readHexFile(paths[editKey], function(data, editPath) {
-            var editPart = _.keys(paths.findByVal(editPath)).shift(); // skeleton | material
+            var editPart = Object.keys(paths.findByVal(editPath))[0]; // skeleton | material
             self.grunt.log.writeln('[BstReplace] Start to handle "' + editPart + '" file: ' + editPath);
 
             if (editPart === 'skeleton') { // 骨骼内容修改

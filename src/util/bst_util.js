@@ -3,7 +3,6 @@
 var fs = require('fs');
 var path = require('path');
 var request = require('request');
-var _ = require('underscore');
 
 /**
  * @type {BstConst|exports}
@@ -40,10 +39,10 @@ BstUtil.prototype.printHr = function() {
 };
 
 BstUtil.prototype.trim = function(str, remove) {
-    if (_.isArray(remove)) {
-        _.each(remove, function(target) {
+    if (Array.isArray(remove)) {
+        for (const target of remove) {
             str = str.replace(new RegExp('^' + target, 'g'), '').replace(new RegExp(target + '$', 'g'), '');
-        });
+        }
     } else {
         str = str.replace(new RegExp('^' + remove, 'g'), '').replace(new RegExp(remove + '$', 'g'), '');
     }
@@ -294,7 +293,7 @@ BstUtil.prototype.fileDownload = function(url, filepath, callback, headers) {
     ws.on('error', function(err) { errReport(err); });
 
     var options = {"url": url};
-    if (typeof headers !== 'undefined' && _.keys(headers).length != 0) {
+    if (typeof headers !== 'undefined' && Object.keys(headers).length != 0) {
         options['headers'] = headers;
     }
     request(options).pipe(ws).on('close', function() {
@@ -399,15 +398,15 @@ BstUtil.prototype.dataKeyCheck = function(element) {
     var self = this;
 
     var hasInvalidKey = false;
-    var elementKeys = _.keys(element);
-    _.each(self.requiredDataKeys, function(requiredKey) {
+    var elementKeys = Object.keys(element);
+    for (const requiredKey of self.requiredDataKeys) {
         if (elementKeys.indexOf(requiredKey) === -1) { // 必须的键值在当前元素中未找到
             hasInvalidKey = true;
             self.grunt.log.error('[BstUtil] Required mesh element key "' + requiredKey + '"' +
                 ' not found in element: ' +
                 '"' + element['codeWithRace'] + '_' + element['col'] + '"');
         }
-    });
+    }
 
     return hasInvalidKey;
 };
@@ -423,7 +422,7 @@ BstUtil.prototype.getElementDataFromPartConfFile = function(partType, elementId)
     this.partTypeCheck(partType);
 
     var conf = this.readJsonFile(path.join(BstConst.PATH_DATABASE, partType, 'data', 'data.json'));
-    if (_.keys(conf).indexOf(elementId) === -1) {
+    if (Object.keys(conf).indexOf(elementId) === -1) {
         this.grunt.fail.fatal('[BstUtil] Target element with id "' + elementId + '" was not found in conf of part: ' + partType);
     }
 

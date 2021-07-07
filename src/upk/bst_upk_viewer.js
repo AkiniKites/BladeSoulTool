@@ -3,7 +3,6 @@
 var fs = require('fs');
 var cp = require('child_process');
 var path = require('path');
-var _ = require('underscore');
 
 /**
  * @type {BstUtil|exports}
@@ -71,12 +70,12 @@ BstUpkViewer.prototype.start = function(partType, elementId) {
 
     // scan upkId.log to copy all resources upk
     var upkLog = self.util.readFileSplitWithLineBreak(path.join(BstConst.PATH_UPK_LOG, element['skeleton'] + '.log'));
-    _.each(upkLog, function(line) {
+    for (const line of upkLog) {
         var match = line.match(/(\d+).upk/);
         if (match !== null) {
             copyResourceUpk(match[1]);
         }
-    });
+    }
     self.util.printHr();
 
     var displayModel = function() {

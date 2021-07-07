@@ -87,13 +87,13 @@ services.factory('BstService', ['$http', '$q', function($http, $q) {
                 headers: {'Content-type': 'application/x-www-form-urlencoded'}
             }).success(function(result) {
                 if (typeof result !== 'undefined' && result !== null && result.length > 0) {
-                    _.each(result, function(row, rowIndex) {
+                    for (const [rowIndex, row] of Object.entries(result)) {
                         result[rowIndex]['origin'] = angular.fromJson(row['origin']);
                         result[rowIndex]['target'] = angular.fromJson(row['target']);
                         result[rowIndex]['time'] = row['time'] * 1000; // convert unix timestamp to Date
-                    });
-                    _.sortBy(result, function(row) {
-                        return parseInt(row['time']);
+                    }
+                    result.sort(function(a, b) {
+                        return parseInt(a['time']) - parseInt(b['time']);
                     });
                     list[page] = result;
                     deferred.resolve(result);
@@ -113,11 +113,11 @@ services.factory('BstService', ['$http', '$q', function($http, $q) {
             headers: {'Content-type': 'application/x-www-form-urlencoded'}
         }).success(function(result) {
             if (parseInt(result) === 1) {
-                _.each(list[page], function(row, rowIndex) {
+                for (const [rowIndex, row] of Object.entries(result)) {
                     if (row['id'] === id) {
                         list[page][rowIndex]['solved'] = 1;
                     }
-                });
+                }
             }
             deferred.resolve(result);
         });
@@ -132,11 +132,11 @@ services.factory('BstService', ['$http', '$q', function($http, $q) {
             headers: {'Content-type': 'application/x-www-form-urlencoded'}
         }).success(function(result) {
             if (parseInt(result) === 1) {
-                _.each(list[page], function(row, rowIndex) {
+                for (const [rowIndex, row] of Object.entries(result)) {
                     if (row['id'] === id) {
                         delete list[page][rowIndex];
                     }
-                });
+                }
             }
             deferred.resolve(result);
         });

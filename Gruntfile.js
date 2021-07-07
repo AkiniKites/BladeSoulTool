@@ -55,7 +55,6 @@ String.prototype.countOccurence = function(needle) {
 var fs = require('fs');
 var cp = require('child_process');
 var path = require('path');
-var _ = require('underscore');
 var moment = require('moment');
 /**
  * @type {BstConst|exports}
@@ -292,11 +291,11 @@ module.exports = function(grunt) {
     var Task_BuildPreparer = function() {
         var util = new BstUtil(grunt);
         // 事先删除上次截屏流程产生出来的中间png文件
-        _.each(BstConst.PART_TYPES, function(type) {
+        for (const type of BstConst.PART_TYPES) {
             var pngOutputPath = path.join(BstConst.PATH_DATABASE, type, 'pics');
             util.deleteDir(pngOutputPath, false);
             util.mkdir(pngOutputPath);
-        });
+        }
     };
 
     //-------------------------------------------------------------------------------------------

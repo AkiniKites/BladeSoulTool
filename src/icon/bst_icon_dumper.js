@@ -3,7 +3,6 @@
 var fs = require('fs');
 var cp = require('child_process');
 var path = require('path');
-var _ = require('underscore');
 const tga2png = require('tga2png');
 
 /**

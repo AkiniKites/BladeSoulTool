@@ -3,7 +3,6 @@
 var fs = require('fs');
 var cp = require('child_process');
 var path = require('path');
-var _ = require('underscore');
 var xml2js = require('xml2js');
 
 /**
@@ -274,9 +273,9 @@ BstUpkParser.prototype.preProcess = function() {
     });
 
     // 为 buildDatabase 阶段预先准备好需要扫描的材质 upkIds 列表
-    self.upkIdsRescanMaterial = _.keys(upkListSkeletonUnrecognized) // 未能辨认的骨骼upkIds
-        .concat(_.keys(upkListUnrecognized)) // 未能辨认的骨骼upkIds
-        .concat(_.keys(upkListMaterial)); // 所有的材质upkIds
+    self.upkIdsRescanMaterial = Object.keys(upkListSkeletonUnrecognized) // 未能辨认的骨骼upkIds
+        .concat(Object.keys(upkListUnrecognized)) // 未能辨认的骨骼upkIds
+        .concat(Object.keys(upkListMaterial)); // 所有的材质upkIds
 
     self.util.writeFile(path.join(BstConst.PATH_UPK_DATA_LIST, BstConst.LIST_FILE_SKELETON_COSTUME), self.util.formatJson(upkListSkeletonCostume));
     self.util.writeFile(path.join(BstConst.PATH_UPK_DATA_LIST, BstConst.LIST_FILE_SKELETON_ATTACH), self.util.formatJson(upkListSkeletonAttach));
@@ -419,7 +418,7 @@ BstUpkParser.prototype.preProcessSkeleton = function() {
 
     var finishedCount = 0;
 
-    _.each(self.upkIdsSkeleton, function(upkId) {
+    for (const upkId of Object.values(self.upkIdsSkeleton)) {
         self.grunt.log.writeln('[BstUpkParser] Pre process skeleton upk: ' + upkId);
 
         var upkLog = self.util.readFileSplitWithLineBreak(path.join(BstConst.PATH_UPK_LOG, upkId + '.log'));
@@ -454,7 +453,7 @@ BstUpkParser.prototype.preProcessSkeleton = function() {
         }
 
         var col1Material = null;
-        _.each(upkLog, function(line) {
+        for (const line of upkLog) {
             var colMatch = line.match(/Loading\sMaterialInstanceConstant\s(.+)\sfrom\spackage\s(\d+).upk/);
             if (colMatch !== null && col1Material === null) { // 只记录第一个出现的MaterialInstanceConstant的col id信息
                 var colInfo = self.util.formatCol(colMatch[1]);
@@ -468,11 +467,11 @@ BstUpkParser.prototype.preProcessSkeleton = function() {
                      */
                 }
             }
-        });
+        }
 
         var textureId = null; // 真正的贴图upk的id
         var textureObjs = {}; // upkId => [object, object, ...]
-        _.each(upkLog, function(line) {
+        for (const line of upkLog) {
             var textureMatch = line.match(/Loading\sTexture2D\s(.+)\sfrom\spackage\s(\d+).upk/);
             if (textureMatch !== null) {
                 var textureObjId = textureMatch[1];
@@ -486,7 +485,7 @@ BstUpkParser.prototype.preProcessSkeleton = function() {
                 }
                 textureObjs[textureUpkId].push(textureObjId);
             }
-        });
+        }
         textureObjs = textureObjs[textureId]; // 取出真正的贴图upk的objs
 
         if (col1Material === null && textureId === null) {
@@ -517,7 +516,7 @@ BstUpkParser.prototype.preProcessSkeleton = function() {
                 if (splitMaterialUpkId !== null) {
                     // 这里我们还是不知道texture的upk id，mesh.xml里没有描述贴图信息，需要分析刚才解析出来的material upk log
                     var materialUpkLog = self.util.readFileSplitWithLineBreak(path.join(BstConst.PATH_UPK_LOG, splitMaterialUpkId + '.log'));
-                    _.each(materialUpkLog, function(line) {
+                    for (const line of materialUpkLog) {
                         var textureMatch = line.match(/Loading\sTexture2D\s(.+)\sfrom\spackage\s(\d+).upk/);
                         if (textureMatch !== null) {
                             var textureObjId = textureMatch[1];
@@ -531,7 +530,7 @@ BstUpkParser.prototype.preProcessSkeleton = function() {
                             }
                             splitTextureObjs[textureUpkId].push(textureObjId);
                         }
-                    })
+                    }
                 }
 
                 if (splitMaterialUpkId !== null && splitTextureUpkId !== null) {
@@ -568,7 +567,7 @@ BstUpkParser.prototype.preProcessSkeleton = function() {
         self.grunt.log.writeln('[BstUpkParser] Pre process skeleton upk: ' + upkId + ' done, progress: ' +
             finishedCount + ' / ' + self.upkIdsSkeleton.length);
         self.util.printHr();
-    });
+    }
 
     self.util.writeFile(path.join(BstConst.PATH_UPK_DATA_RAW, BstConst.RAW_FILE_SKELETON), self.util.formatJson(self.upkDataSkeleton));
     self.util.writeFile(path.join(BstConst.PATH_UPK_DATA_RAW, BstConst.RAW_FILE_SKELETON_INVALID), self.util.formatJson(self.upkDataSkeletonInvalid));
@@ -586,18 +585,18 @@ BstUpkParser.prototype.preProcessTexture = function() {
 
     var finishedCount = 0;
 
-    _.each(self.upkIdsTexture, function(upkId) {
+    for (const upkId of self.upkIdsTexture) {
         self.grunt.log.writeln('[BstUpkParser] Pre process skeleton upk: ' + upkId);
 
         var upkLog = self.util.readFileSplitWithLineBreak(path.join(BstConst.PATH_UPK_LOG, upkId + '.log'));
 
         var objs = [];
-        _.each(upkLog, function(line) {
+        for (const line of upkLog) {
             var textureMatch = line.match(/Loading\sTexture2D\s(.+)\sfrom\spackage\s\d+.upk/);
             if (textureMatch !== null) {
                 objs.push(textureMatch[1]);
             }
-        });
+        }
         if (objs.length == 0) {
             self.grunt.log.error('[BstUpkParser] Texture objs not found in texture upk data: ' + upkId);
         }
@@ -612,7 +611,7 @@ BstUpkParser.prototype.preProcessTexture = function() {
         self.grunt.log.writeln('[BstUpkParser] Pre process texture upk: ' + upkId + ' done, progress: ' +
             finishedCount + ' / ' + self.upkIdsTexture.length);
         self.util.printHr();
-    });
+    }
 
     // 不要在这里写入文件，因为我们还没收集到material信息，需要在material那步收集
 };
@@ -629,7 +628,7 @@ BstUpkParser.prototype.preProcessMaterial = function() {
 
     var finishedCount = 0;
 
-    _.each(self.upkIdsMaterial, function(upkId) {
+    for (const upkId of self.upkIdsMaterial) {
         self.grunt.log.writeln('[BstUpkParser] Pre process material upk: ' + upkId);
 
         var colInfo = null; // 材质upk的col id
@@ -650,22 +649,14 @@ BstUpkParser.prototype.preProcessMaterial = function() {
                 upkLog[BstConst.UPK_ENTRANCE_LINE_NO].match(/Loading\sMaterialInstanceConstant\s(.+)\sfrom\spackage\s\d+.upk/)[1]
             );
             if (colInfo.match(/col\d+/) === null) { // 会有很多情况下核心col信息是一个非"colX"的格式，循环查询后续的行内容，直到找到我们要的内容
-                _.each(upkLog, function(line) {
+                for (const line of upkLog) {
                     var coreMatch = line.match(/Loading\sMaterialInstanceConstant\s(.+)\sfrom\spackage\s\d+.upk/);
                     if (coreMatch !== null && self.util.formatCol(coreMatch[1]).match(/col\d+/) !== null) {
                         colInfo = self.util.formatCol(coreMatch[1]);
                     }
-                });
-                if (colInfo.match(/col\d+/) === null) { // 仍旧未找到我们需要的colInfo
-                    /**
-                     * UPDATE: 这里不再打log，应该可以在后续应用的时候进行处理
-                     * self.utilBuildMaterialInvalidInfo(upkId);
-                     * self.upkDataMaterialInvalid[upkId]['invalid']['col'] = colInfo;
-                     * self.grunt.log.error('[BstUpkParser] Material info got with invalid format: ' + colInfo);
-                     */
                 }
             }
-            _.each(upkLog, function(line) {
+            for (const line of upkLog) {
                 var textureMatch = line.match(/Loading\sTexture2D\s(.+)\sfrom\spackage\s(\d+).upk/);
                 if (textureMatch !== null) {
                     var textureObjId = textureMatch[1];
@@ -679,16 +670,16 @@ BstUpkParser.prototype.preProcessMaterial = function() {
                     }
                     textureObjs[textureUpkId].push(textureObjId);
                 }
-            });
+            }
             textureObjs = textureObjs[textureId]; // 取出真正的贴图upk的objs
             if (textureId === null) {
                 // 查找是否有某个skeleton在使用当前的material upk，如果找到，才记录错误信息
                 var foundMaterialUsage = false;
-                _.each(self.upkDataSkeleton, function(element) {
+                for (const element of Object.values(self.upkDataSkeleton)) {
                     if (element['col1Material'] == upkId) {
                         foundMaterialUsage = true;
                     }
-                });
+                }
                 if (foundMaterialUsage) {
                     self.utilBuildMaterialInvalidInfo(upkId);
                     self.upkDataMaterialInvalid[upkId]['notFound'].push('texture');
@@ -717,7 +708,7 @@ BstUpkParser.prototype.preProcessMaterial = function() {
         self.grunt.log.writeln('[BstUpkParser] Pre process material upk: ' + upkId + ' done, progress: ' +
             finishedCount + ' / ' + self.upkIdsMaterial.length);
         self.util.printHr();
-    });
+    }
 
     self.util.writeFile(path.join(BstConst.PATH_UPK_DATA_RAW, BstConst.RAW_FILE_TEXTURE), self.util.formatJson(self.upkDataTexture));
     self.util.writeFile(path.join(BstConst.PATH_UPK_DATA_RAW, BstConst.RAW_FILE_MATERIAL), self.util.formatJson(self.upkDataMaterial));
@@ -730,24 +721,24 @@ BstUpkParser.prototype.buildDatabase = function() {
     self.grunt.log.writeln('[BstUpkParser] Start to build database ...');
     self.util.printHr();
 
-    var totalCount = _.keys(self.upkDataSkeleton).length;
+    var totalCount = Object.keys(self.upkDataSkeleton).length;
     var finishedCount = 0;
 
     // 循环构造数据
-    _.each(self.upkDataSkeleton, function(skeletonData, skeletonKey) {
+    for (const [skeletonKey, skeletonData] of Object.entries(self.upkDataSkeleton)) {
         self.buildData(skeletonKey, skeletonData);
         finishedCount++;
         self.grunt.log.writeln('[BstUpkParser] Finish data build of skeleton: ' + skeletonKey +
             ', progress: ' + finishedCount + ' / ' + totalCount);
         self.util.printHr();
-    });
+    }
 
     // 写入数据
-    _.each(BstConst.PART_TYPES, function(type) {
+    for (const type of BstConst.PART_TYPES) {
         self.util.writeFile(path.join(BstConst.PATH_DATABASE, type, 'data', 'data.json'), self.util.formatJson(self.db[type]));
         self.util.writeFile(path.join(BstConst.PATH_DATABASE, type, 'data', 'data_invalid.json'), self.util.formatJson(self.dbInvalid[type]));
         self.grunt.log.writeln('[BstUpkParser] Database build of ' + type + ' done ...');
-    });
+    }
 
     self.grunt.log.writeln('[BstUpkParser] Database build all done ...');
     self.util.printHr();
@@ -762,11 +753,11 @@ BstUpkParser.prototype.buildData = function(skeletonKey, skeletonData) {
 
     // 查找对应code的icon数据
     var iconData = null;
-    _.each(BstConst.PART_TYPES, function(typeName) {
+    for (const typeName of BstConst.PART_TYPES) {
         if (self.iconData[typeName].hasOwnProperty(skeletonCode)) {
-            iconData = _.clone(self.iconData[typeName][skeletonCode]);
+            iconData = { ...self.iconData[typeName][skeletonCode]};
         }
-    });
+    }
     if (iconData === null
         && skeletonCode.match(/^\d{3}$/) === null) { // 3位数字类型的code一般是默认头发等没有icon的模型
         // 没有找到icon数据集，记录日志
@@ -795,7 +786,7 @@ BstUpkParser.prototype.buildData = function(skeletonKey, skeletonData) {
     }
 
     // 检查texture数据
-    if (_.keys(textureData['materials']).length == 0) {
+    if (Object.keys(textureData['materials']).length == 0) {
         self.grunt.log.writeln('[BstUpkParser] No materials info collected for texture: ' + textureId + ', scanning all upk logs ...');
         /**
          * 没有为该texture找到对应的material数据，可能某些描述material信息的upk文件，在关键行[2]里没有以 MaterialInstanceConstant
@@ -813,7 +804,7 @@ BstUpkParser.prototype.buildData = function(skeletonKey, skeletonData) {
          *     Loading Texture2D 60071_GonM_col1_D from package 00017486.upk
          *     Loading Texture2D 60071_GonM_col1_S from package 00017486.upk
          */
-        _.each(self.upkIdsRescanMaterial, function(scanUpkId) {
+        for (const scanUpkId of self.upkIdsRescanMaterial) {
             var scanUpkPath = path.join(BstConst.PATH_UPK_LOG, scanUpkId + '.log');
             var scanUpkLog = self.util.readFileSplitWithLineBreak(scanUpkPath);
 
@@ -821,7 +812,7 @@ BstUpkParser.prototype.buildData = function(skeletonKey, skeletonData) {
             var foundMaterial3Info = false;
             var foundTextureInfo = false;
 
-            _.each(scanUpkLog, function(scanLine) {
+            for (const scanLine of scanUpkLog) {
                 var scanMaterialMatch = scanLine.match(new RegExp("Loading\\sMaterialInstanceConstant\\s(.+)\\sfrom\\spackage\\s" + scanUpkId + ".upk"));
                 if (scanMaterialInfo === null && scanMaterialMatch !== null) {
                     // 只需要查找第一个找到的material信息
@@ -831,7 +822,7 @@ BstUpkParser.prototype.buildData = function(skeletonKey, skeletonData) {
                 if (scanTextureMatch !== null) {
                     foundTextureInfo = true;
                 }
-            });
+            }
 
             if (scanMaterialInfo === null) {
                 // 部分材质upk在关键行[2]里的描述是 Material3 colX，这里也一并检查，参考：material：00019772
@@ -851,9 +842,9 @@ BstUpkParser.prototype.buildData = function(skeletonKey, skeletonData) {
                     self.upkDataSkeleton[skeletonKey]['col1Material'] = scanUpkId;
                 }
             }
-        });
+        }
     }
-    if (_.keys(textureData['materials']).length == 0) {
+    if (Object.keys(textureData['materials']).length == 0) {
         // 仍旧没有找到贴图对应的材质upk信息
         self.utilBuildDataInvalidInfo(skeletonType, skeletonCode);
         self.dbInvalid[skeletonType][skeletonCode]['invalid'].push('texture:[skeleton:' + skeletonId + ',texture:' + textureId + ']');
@@ -866,11 +857,11 @@ BstUpkParser.prototype.buildData = function(skeletonKey, skeletonData) {
     var materials = textureData['materials']; // { colX : upkId, ... }
 
     // 组装数据
-    _.each(materials, function(materialId, col) { // 轮询所有的materials数据
+    for (const [col, materialId] of Object.entries(materials)) { // 轮询所有的materials数据
         // 检查material数据
         if (self.upkDataMaterialInvalid.hasOwnProperty(materialId)
             && self.upkDataMaterialInvalid[materialId]['notFound'].length === 0 // 没有未找到信息错误
-            && _.keys(self.upkDataMaterialInvalid[materialId]['invalid']).length === 0 // 没有不合法元素错误
+            && Object.keys(self.upkDataMaterialInvalid[materialId]['invalid']).length === 0 // 没有不合法元素错误
             && self.upkDataMaterialInvalid[materialId]['noTexture'] == textureId) { // 贴图信息没找到错误
             // 这里不需要处理错误，因为能跑到这里，说明上面的贴图数据肯定已经找到了，所以贴图没找到的错误可以忽略
         } else if (self.upkDataMaterialInvalid.hasOwnProperty(materialId)) {
@@ -901,12 +892,12 @@ BstUpkParser.prototype.buildData = function(skeletonKey, skeletonData) {
                 // 有all种族的icon
                 pic = icons['All'];
             }
-            if (pic === null && _.keys(icons).length > 0) {
+            if (pic === null && Object.keys(icons).length > 0) {
                 // icon图片未找到，但是icon图片配置列表里是有东西的，则随便给一个
                 for (var iconKey in icons) {
                     if (!icons.hasOwnProperty(iconKey)) { continue; }
-                    if (_.isArray(icons[iconKey]) && icons[iconKey].length > 0) {
-                        pic = _.clone(icons[iconKey]).shift();
+                    if (Array.isArray(icons[iconKey]) && icons[iconKey].length > 0) {
+                        pic = icons[iconKey][0];
                         break;
                     } else if (icons[iconKey] !== '' && icons[iconKey] !== null && typeof icons[iconKey] !== 'undefined') {
                         pic = icons[iconKey];
@@ -946,7 +937,7 @@ BstUpkParser.prototype.buildData = function(skeletonKey, skeletonData) {
             "race": skeletonData['race'],
             "pic": pic
         };
-    });
+    }
 };
 
 BstUpkParser.prototype.utilBuildSkeletonInvalidInfo = function(upkId) {
@@ -990,7 +981,7 @@ BstUpkParser.prototype.utilBuildDataInvalidInfo = function(dataType, code) {
 };
 
 BstUpkParser.prototype.utilSearchMeshXmlViaSkeletonId = function(skeletonId) {
-    var filtered = _.filter(this.meshXml, function(element) {
+    var filtered = this.meshXml.filter(function(element) {
         var resourceMatch = element['$']['resource-name'].match(/(\d+)\..*/);
         return (
             BstConst.RACE_VALID.indexOf(element['$']['race']) !== -1 // race 种族字符串必须是4大种族中的一个
@@ -1052,12 +1043,12 @@ BstUpkParser.prototype.utilRecognizeSkeletonType = function(skeletonId, upkLog) 
 //
 //        // 03. 首先检查upk log里有没有含body的Material3信息，有的话，是衣服（注意：有部分饰品因为和身体相关的，也有这个代码，会串）
 //        if (type === BstConst.PART_TYPE_ATTACH) {
-//            _.each(upkLog, function(line) {
+//            for (const line of upkLog) {
 //                var match = line.match(/Loading\sMaterial3\s(.+)\sfrom\spackage\s\d+.upk/);
 //                if (match !== null && match[1].toLowerCase().match(/.*body.*/i) !== null) {
 //                    type = BstConst.PART_TYPE_COSTUME;
 //                }
-//            });
+//            }
 //        }
 
         return type;

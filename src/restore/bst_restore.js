@@ -1,7 +1,6 @@
 "use strict";
 
 var path = require('path');
-var _ = require('underscore');
 
 /**
  * @type {BstUtil|exports}
@@ -44,26 +43,26 @@ BstRestore.prototype.processRestore = function() {
     var self = this;
     if (self.backup['restore'].length > 0) {
         // 恢复文件
-        _.each(self.backup['restore'], function(backupPath) {
+        for (const backupPath of self.backup['restore']) {
             self.util.restoreFile(backupPath);
-        });
+        }
         // 删除备份文件
-        _.each(self.backup['restore'], function(backupPath) {
+        for (const backupPath of self.backup['restore']) {
             var dir = path.dirname(backupPath);
             self.util.setGruntWorkingDir(dir);
             self.util.deleteFile(backupPath);
-        });
+        }
     }
 };
 
 BstRestore.prototype.processDelete = function() {
     var self = this;
     if (self.backup['delete'].length > 0) {
-        _.each(self.backup['delete'], function(deletePath) {
+        for (const deletePath of self.backup['delete']) {
             var dir = path.dirname(deletePath);
             self.util.setGruntWorkingDir(dir);
             self.util.deleteFile(deletePath);
-        });
+        }
     }
 };
 

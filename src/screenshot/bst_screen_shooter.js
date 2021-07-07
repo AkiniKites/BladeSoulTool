@@ -3,7 +3,6 @@
 var fs = require('fs');
 var cp = require('child_process');
 var path = require('path');
-var _ = require('underscore');
 
 /**
  * @type {BstUtil|exports}
@@ -26,7 +25,7 @@ var BstScreenShooter = function(grunt, overwrite, done) {
     this.types = BstConst.PART_TYPES; // 需要处理的数据类型
 
     this.data = {}; // 需要处理的数据：database/[attach|costume|weapon]/data/data.json, etc...
-    this.workingList = null; // 需要处理的数据的键数组：_.keys(this.data)
+    this.workingList = null; // 需要处理的数据的键数组：Object.keys(this.data)
 
     this.statusTotalCount = 0; // 总共需要处理的模型个数
     this.statusFinishedCount = 0; // 处理完成的模型个数
@@ -57,7 +56,7 @@ BstScreenShooter.prototype.process = function(type) {
 BstScreenShooter.prototype.processType = function(type) {
     var self = this;
 
-    self.workingList = _.keys(self.data);
+    self.workingList = Object.keys(self.data);
     self.statusTotalCount = self.workingList.length;
 
     self.grunt.log.writeln('[BstScreenShooter] ' + type + ' data loaded, "' + self.statusTotalCount + '" lines of record read.');
@@ -91,9 +90,9 @@ BstScreenShooter.prototype.processType = function(type) {
                 if (self.backupList.length > 0) {
                     self.grunt.log.writeln('[BstScreenShooter] Delete backup skeleton upk files.');
                     self.util.setGruntWorkingDir(self.util.getBnsPath()); // 为了截图修改的骨骼文件应该都在bns目录下
-                    _.each(self.backupList, function(backupPath) {
+                    for (const backupPath of self.backupList) {
                         self.util.deleteFile(backupPath, false);
-                    });
+                    }
                     self.util.restoreGruntWorkingDir();
                 }
                 self.taskDone();

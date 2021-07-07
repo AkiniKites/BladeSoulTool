@@ -3,7 +3,6 @@
 var fs = require('fs');
 var cp = require('child_process');
 var path = require('path');
-var _ = require('underscore');
 
 /**
  * @type {BstUtil|exports}
@@ -27,7 +26,7 @@ var BstPngOptimizer = function(grunt, done) {
     this.gruntWorkingPath = process.cwd();
 
     this.statusIsTaskRunning = false;
-    this.statusTotalTaskCount = _.keys(this.tasks).length;
+    this.statusTotalTaskCount = Object.keys(this.tasks).length;
     this.statusFinishedTaskCount = 0;
 
     this.workingList = [];
@@ -50,7 +49,7 @@ BstPngOptimizer.prototype.start = function() {
     self.util.printHr();
 
     var taskTimer = setInterval(function() {
-        if (!self.statusIsTaskRunning && _.keys(self.tasks).length > 0) {
+        if (!self.statusIsTaskRunning && Object.keys(self.tasks).length > 0) {
             self.statusIsTaskRunning = true;
             var taskConf = self.tasks.shift();
 
