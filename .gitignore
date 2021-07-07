@@ -27,11 +27,8 @@ database/icon/tga/**/*.tga
 database/icon/png/**/*.png
 VS_GUI/.vs/*
 VS_GUI/BladeSoulTool/log/*
+VS_GUI/BladeSoulTool/bin/*
 VS_GUI/BladeSoulTool/obj/*
-VS_GUI/BladeSoulTool/tmp/attach/*
-VS_GUI/BladeSoulTool/tmp/costume/*
-VS_GUI/BladeSoulTool/tmp/icon/*
-VS_GUI/BladeSoulTool/tmp/weapon/*
-node_modules
+VS_GUI/BladeSoulTool/tmp/*
 
 database*/
