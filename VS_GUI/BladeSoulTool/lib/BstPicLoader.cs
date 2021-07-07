@@ -83,7 +83,7 @@ namespace BladeSoulTool.lib
                 }
                 else
                 {
-                    imgpath = BstManager.GetItemPicPath(type, elementData, false);
+                    imgpath = BstManager.GetItemPicPath(type, elementData);
                     blob = BstManager.GetBytesFromFile(imgpath);
                 }
 

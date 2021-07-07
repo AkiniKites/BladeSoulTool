@@ -433,7 +433,7 @@ namespace BladeSoulTool.lib
             return name;
         }
 
-        public static string GetIconPath(JObject elementData, bool compressed = true)
+        public static string GetIconPath(JObject elementData)
         {
             string path = null;
 
@@ -441,10 +441,9 @@ namespace BladeSoulTool.lib
 
             if (!string.IsNullOrEmpty(iconPicName))
             {
-                path = BstManager.PathRoot + (compressed 
-                    ? (string) BstManager.Instance.SystemSettings["png_optimizer"]["tasks"]["icon"]["dest"]
-                    : (string) BstManager.Instance.SystemSettings["png_optimizer"]["tasks"]["icon"]["src"]
-                    ) + "/" + iconPicName;
+                path = BstManager.PathRoot + 
+                    (string) BstManager.Instance.SystemSettings["png_optimizer"]["tasks"]["icon"]["src"]
+                    + "/" + iconPicName;
             }
             else
             {
@@ -455,12 +454,11 @@ namespace BladeSoulTool.lib
             return path;
         }
 
-        public static string GetItemPicPath(int type, JObject elementData, bool compressed = true)
+        public static string GetItemPicPath(int type, JObject elementData)
         {
-            return BstManager.PathRoot + (compressed 
-                ? (string)BstManager.Instance.SystemSettings["png_optimizer"]["tasks"][BstManager.GetTypeName(type)]["dest"]
-                : (string)BstManager.Instance.SystemSettings["png_optimizer"]["tasks"][BstManager.GetTypeName(type)]["src"]
-                ) + "/" + (string) elementData["core"] + "_" + (string) elementData["col"] + ".png";
+            return BstManager.PathRoot + 
+                (string)BstManager.Instance.SystemSettings["png_optimizer"]["tasks"][BstManager.GetTypeName(type)]["src"]
+                + "/" + (string) elementData["core"] + "_" + (string) elementData["col"] + ".png";
         }
 
         public static string GetItemOriginJsonPath(int type)

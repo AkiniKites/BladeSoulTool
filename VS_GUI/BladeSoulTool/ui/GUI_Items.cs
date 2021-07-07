@@ -535,7 +535,7 @@ namespace BladeSoulTool.ui
             var cachePath = BstManager.GetIconPath(elementData);
             if(!File.Exists(cachePath))
             {
-                cachePath = BstManager.GetIconPath(elementData, false);
+                cachePath = BstManager.GetIconPath(elementData);
             }
             if (async)
             {

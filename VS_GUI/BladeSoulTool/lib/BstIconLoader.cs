@@ -52,7 +52,7 @@ namespace BladeSoulTool.lib
                 }
                 else
                 {
-                    iconPath = BstManager.GetIconPath(task.ElementData, false);
+                    iconPath = BstManager.GetIconPath(task.ElementData);
                     pic = BstManager.GetBytesFromFile(iconPath);
                 }
 
