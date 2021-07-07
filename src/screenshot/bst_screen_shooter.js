@@ -14,10 +14,11 @@ var BstUtil = require('../util/bst_util.js');
  */
 var BstConst = require('../const/bst_const.js');
 
-var BstScreenShooter = function(grunt, done) {
-    this.grunt    = grunt;
-    this.util     = new BstUtil(grunt);
-    this.taskDone = done; // notify grunt: tasks done
+var BstScreenShooter = function(grunt, overwrite, done) {
+    this.grunt     = grunt;
+    this.util      = new BstUtil(grunt);
+    this.overwrite = overwrite;
+    this.taskDone  = done; // notify grunt: tasks done
 
     this.conf = this.util.readJsonFile('./config/setting.json');
     this.shotInterval = this.conf['umodel_shooter']['interval'];
@@ -64,11 +65,14 @@ BstScreenShooter.prototype.processType = function(type) {
 
     // 清理旧的截图文件，并创建目标输出文件夹
     var targetOutputPath = path.join(BstConst.PATH_DATABASE, type, 'pics');
-    self.util.deleteDir(targetOutputPath, false); // 文件夹没找到也不要报错
-    self.util.mkdir(targetOutputPath);
+    if (self.overwrite) {
+        self.grunt.log.writeln('[BstScreenShooter] Cleaning path: ' + targetOutputPath);
+        self.util.deleteDir(targetOutputPath, false); // 文件夹没找到也不要报错
+        self.util.mkdir(targetOutputPath);
+    }
 
     var timer = setInterval(function() {
-        if (!self.statusIsWorking && self.workingList.length > 0) {
+        while (!self.statusIsWorking && self.workingList.length > 0) {
             // 目前没有运行中的任务，安排任务
             self.statusIsWorking = true;
             self.processSingle(type, self.data[self.workingList.shift()]);
@@ -95,7 +99,7 @@ BstScreenShooter.prototype.processType = function(type) {
                 self.taskDone();
             }
         }
-    }, 500);
+    }, 10);
 };
 
 BstScreenShooter.prototype.processSingle = function(type, element) {
@@ -116,6 +120,14 @@ BstScreenShooter.prototype.processSingle = function(type, element) {
     });
     if (skeletonPath === null) {
         return; // 两个位置upk文件都不存在，只能跳过该项
+    }
+
+    var outputPath = path.join(BstConst.PATH_DATABASE, type, 'pics', name + '.png');
+    if (self.util.checkFileExists(outputPath, false)) {
+        self.grunt.log.writeln('[BstScreenShooter] Skipping file, already exists: ' + name);
+        
+        self.finishSingle(name);
+        return;
     }
 
     var hasBackupToRestore = false; // 标识是否有文件需要恢复
@@ -164,9 +176,11 @@ BstScreenShooter.prototype.processSingle = function(type, element) {
             handleBackup();
         });
         worker.on('exit', function (code) { self.util.logChildProcessExit('umodel', code); });
+        //Start the next job at intervals, because the worker child process will not exit during the opening of the umodel window, and the process cannot continue.
+        // 间隔启动下一个工作，因为在umodel窗口打开期间，worker子进程是不会退出的，流程无法继续执行下去
         var umodelShotTimer = setTimeout(function() {
             handleWinSize();
-        }, self.shotInterval); // 间隔启动下一个工作，因为在umodel窗口打开期间，worker子进程是不会退出的，流程无法继续执行下去
+        }, self.shotInterval); 
     };
 
     var xPos = 100, yPos = 0, width = 500, height = 600;
@@ -188,7 +202,7 @@ BstScreenShooter.prototype.processSingle = function(type, element) {
     var handleScreenShot = function() {
         var worker = cp.exec(
             'screenshot-cmd.exe -rc ' + xPos + ' ' + yPos + ' ' + (xPos + width) + ' ' + (yPos + height) +
-                ' -o ' + path.join(BstConst.PATH_DATABASE, type, 'pics', name + '.png'),
+                ' -o ' + outputPath,
             {"cwd": './resources/screenshot/'}
         );
         worker.stdout.on('data', function (data) { self.util.logChildProcessStdout(data); });

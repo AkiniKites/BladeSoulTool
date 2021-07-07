@@ -4,7 +4,6 @@
     "bns": "contents\\bns\\CookedPC",
     "data": "contents\\Local\\NCWEST\\data",
     "tencent": "contents\\Local\\NCWEST\\ENGLISH\\CookedPC",
-    
     "upk": "contents\\bns\\CookedPC",
     "local": "contents\\Local\\NCWEST\\ENGLISH\\CookedPC"
   },
@@ -19,7 +18,7 @@
     "cycleInterval": 10
   },
   "umodel_shooter": {
-    "interval": 3000
+    "interval": 1000
   },
   "icon_dumper": {
     "childProcess": 10,

@@ -188,12 +188,12 @@ module.exports = function(grunt) {
         this.async();
     };
 
-    var Task_ScreenShooter = function() {
+    var Task_ScreenShooter = function(args1) {
         var Shooter = require('./src/screenshot/bst_screen_shooter.js');
 
         var done = this.async();
 
-        var shooter = new Shooter(grunt, done);
+        var shooter = new Shooter(grunt, args1 === 'overwrite', done);
         shooter.start();
     };
 
