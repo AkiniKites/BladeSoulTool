@@ -7,12 +7,7 @@ resources/others/剑灵模型识别器_V1.0.13.1226_by_纯粹之伤/notify.log
 resources/dedat/Bns_DatEditor/tmp
 !resources/dedat/output/engine
 resources/umodel/notify.log
-resources/umodel/output/**/*.tga
-resources/umodel/output/**/*.mat
-resources/umodel/output/**/*.psk
-resources/umodel/output/**/*.pskx
-resources/umodel/output/**/*.psa
-resources/umodel/output/**/*.config
+resources/umodel/output/**/*
 resources/umodel/*.upk
 resources/umodel/*.bak
 resources/optipng/output**/*.png
@@ -26,9 +21,9 @@ database/weapon/pics/**/*.png
 database/icon/tga/**/*.tga
 database/icon/png/**/*.png
 VS_GUI/.vs/*
-VS_GUI/BladeSoulTool/log/*
-VS_GUI/BladeSoulTool/bin/*
-VS_GUI/BladeSoulTool/obj/*
-VS_GUI/BladeSoulTool/tmp/*
+VS_GUI/**/log/*
+VS_GUI/**/bin/*
+VS_GUI/**/obj/*
+VS_GUI/**/tmp/*
 
 database*/
