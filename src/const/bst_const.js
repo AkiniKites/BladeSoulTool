@@ -39,8 +39,11 @@ BstConst.UPK_UNKNOWN_MEMBER_ERROR = '*** unknown member';
 
 BstConst.UPK_ENTRANCE_LINE_NO = 2; // 一般来说，log的第三行里的内容是关键信息
 BstConst.UPK_TYPE_SKELETON = 'SkeletalMesh3';
+BstConst.UPK_TYPE_SKELETON_MATCHER = /ClassName\: SkeletalMesh3/;
 BstConst.UPK_TYPE_TEXTURE  = 'Texture2D';
+BstConst.UPK_TYPE_TEXTURE_MATCHER  = /ClassName\: Texture2D/;
 BstConst.UPK_TYPE_MATERIAL = 'MaterialInstanceConstant';
+BstConst.UPK_TYPE_MATERIAL_MATCHER = /ClassName\: MaterialInstanceConstant/;
 
 BstConst.PATH_UPK_BASE = 'database/upk';
 BstConst.PATH_UPK_LOG = path.join(process.cwd(), BstConst.PATH_UPK_BASE, 'log');

@@ -38,17 +38,6 @@ BstUtil.prototype.printHr = function() {
     this.grunt.log.writeln('-------------------------------------------------------------------------------');
 };
 
-BstUtil.prototype.trim = function(str, remove) {
-    if (Array.isArray(remove)) {
-        for (const target of remove) {
-            str = str.replace(new RegExp('^' + target, 'g'), '').replace(new RegExp(target + '$', 'g'), '');
-        }
-    } else {
-        str = str.replace(new RegExp('^' + remove, 'g'), '').replace(new RegExp(remove + '$', 'g'), '');
-    }
-    return str;
-};
-
 BstUtil.prototype.strUtf8ToHex = function(str) {
     var result = new Buffer(str).toString('hex');
     this.grunt.log.writeln('[BstUtil] Convert UTF8 to HEX, FROM: ' + str + ', TO: ' + result);
