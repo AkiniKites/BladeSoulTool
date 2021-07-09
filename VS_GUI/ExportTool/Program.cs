@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
 using System.Management;
 using System.Runtime.InteropServices;
@@ -31,20 +32,33 @@ namespace ExportTool
 
             string output = args[4];
 
-            var hWnd = WaitForWindow(pid, timeout);
-            ResizeWindow(hWnd, w, l);
+            var (hWnd, p) = WaitForWindow(pid, timeout);
 
-            Thread.Sleep(250); //wait for repaint
-            
-            var img = GetScreenshot(hWnd);
-            img.Save(output, ImageFormat.Png);
+            try
+            {
+                ResizeWindow(hWnd, w, l);
 
-            CloseWindow(hWnd);
+                Thread.Sleep(250); //wait for repaint
+
+                var img = GetScreenshot(hWnd);
+
+                var dir = Path.GetDirectoryName(output);
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+                img.Save(output, ImageFormat.Png);
+            }
+            finally
+            {
+                CloseWindow(hWnd);
+
+                if (!p.WaitForExit(timeout))
+                    throw new InvalidOperationException("Process did not exit in time: " + pid);
+            }
 
             return 0;
         }
 
-        static IntPtr WaitForWindow(int pid, int timeout)
+        static (IntPtr, Process) WaitForWindow(int pid, int timeout)
         {
             Process p = null;
             if (!WaitFor(timeout, () =>
@@ -72,7 +86,7 @@ namespace ExportTool
                 throw new InvalidOperationException("Unable to find window for process with pid: " + pid);
             }
 
-            return hWnd;
+            return (hWnd, p);
         }
 
         static int[] GetAllChildProcesses(int pid)

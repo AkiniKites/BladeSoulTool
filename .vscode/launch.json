@@ -7,10 +7,21 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch Grunt",
-            "args": ["upk_parser"],            
+            "name": "upk_parser",
+            "args": ["upk_parser", "--stack", "--verbose"],
             "program": "${env:APPDATA}\\npm\\node_modules\\grunt-cli\\bin\\grunt", 
-            "stopOnEntry": true,
+            "stopOnEntry": false,
+            "console": "integratedTerminal",
+            "cwd": "${workspaceRoot}"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "shooter",
+            "args": ["shooter", "--stack", "--verbose"],
+            "program": "${env:APPDATA}\\npm\\node_modules\\grunt-cli\\bin\\grunt", 
+            "stopOnEntry": false,
+            "console": "integratedTerminal",
             "cwd": "${workspaceRoot}"
         }
     ]

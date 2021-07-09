@@ -39,7 +39,7 @@ BstUtil.prototype.printHr = function() {
 };
 
 BstUtil.prototype.strUtf8ToHex = function(str) {
-    var result = new Buffer(str).toString('hex');
+    var result = Buffer.from(str).toString('hex');
     this.grunt.log.writeln('[BstUtil] Convert UTF8 to HEX, FROM: ' + str + ', TO: ' + result);
 
     return result;
@@ -63,6 +63,14 @@ BstUtil.prototype.copyFile = function(fromPath, toPath, needFail) {
     if (this.checkFileExists(fromPath, needFail)) {
         this.grunt.file.copy(fromPath, toPath);
         this.grunt.log.writeln('[BstUtil] Copy file FROM: ' + fromPath + ', TO: ' + toPath);
+    }
+};
+
+BstUtil.prototype.moveFile = function(fromPath, toPath, needFail) {
+    if (this.checkFileExists(fromPath, needFail)) {
+        this.grunt.file.copy(fromPath, toPath);
+        this.grunt.file.delete(fromPath, {force: true});
+        this.grunt.log.writeln('[BstUtil] Move file FROM: ' + fromPath + ', TO: ' + toPath);
     }
 };
 
@@ -109,7 +117,7 @@ BstUtil.prototype.writeFile = function(path, content) {
 };
 
 BstUtil.prototype.writeHexFile = function(path, data) {
-    var buff = new Buffer(data, 'hex');
+    var buff = Buffer.from(data, 'hex');
 
     this.grunt.file.write(path, buff, {encoding: 'hex'});
 
@@ -147,9 +155,42 @@ BstUtil.prototype.readHexFile = function(path, callback) {
     });
 };
 
+BstUtil.prototype.readFileToBuffer = function(path, callback) {
+    this.checkFileExists(path);
+
+    fs.readFile(path, function(err, data){
+        callback(data, path);
+    });
+};
+
 BstUtil.prototype.replaceStrAll = function(str, fromStr, toStr) {
     this.grunt.log.writeln('[BstUtil] Replace string all appearance from: ' + fromStr + ', to: ' + toStr);
     return str.replace(new RegExp(fromStr, 'g'), toStr);
+};
+
+BstUtil.prototype.replaceAllBytes = function(buffer, from, to, onFound) {
+    this.grunt.log.writeln('[BstUtil] Replace bytes all appearance from: ' + from + ', to: ' + to);
+
+    const fromBuf = Buffer.from(from);
+    const toBuf = Buffer.from(to);
+
+    function replaceAll(buf) {
+        const idx = buf.indexOf(fromBuf);
+        if (idx == -1) {
+            return buf;
+        }
+
+        if (onFound && typeof onFound === 'function') {
+            onFound(buf, idx);
+        }
+
+        const before = buf.slice(0, idx);
+        const after = replaceAll(buf.slice(idx + fromBuf.length));
+        const len = idx + toBuf.length + after.length;
+        return Buffer.concat([ before, toBuf, after ], len);
+    }
+
+    return replaceAll(buffer);
 };
 
 BstUtil.prototype.findStrCount = function(str, findStr) {
@@ -213,11 +254,16 @@ BstUtil.prototype.getBackupFilePathViaOriginPath = function(originPath) {
 
 BstUtil.prototype.backupFile = function(originPath) { // 这里的path是需要备份的原始文件
     var backupPath = this.getBackupFilePathViaOriginPath(originPath);
-    if (this.grunt.file.exists(originPath) // 备份的原始文件存在
-        && !this.grunt.file.exists(backupPath)) { // 目标备份文件不存在
+
+    if (!this.grunt.file.exists(originPath)) {
+        this.grunt.log.writeln('[BstUtil] Skipping backup, file missing: ' + originPath);
+    } else if (this.grunt.file.exists(backupPath)) {
+        this.grunt.log.writeln('[BstUtil] Skipping backup, backup exists: ' + backupPath);
+    } else {
         this.copyFile(originPath, backupPath);
         this.grunt.log.writeln('[BstUtil] Backup file generated: ' + backupPath);
     }
+
     return backupPath; // 用来保存到backup.json，或者马上恢复文件
 };
 
@@ -227,7 +273,7 @@ BstUtil.prototype.restoreFile = function(backupPath) { // 这里的path是带后
     var originName = backupName.substr(0, backupName.indexOf(BstConst.BACKUP_TAIL));
     var originPath = path.join(dir, originName);
     if (this.grunt.file.exists(backupPath)) { // 备份文件存在
-        this.copyFile(backupPath, originPath);
+        this.moveFile(backupPath, originPath);        
         this.grunt.log.writeln('[BstUtil] Original file restored: ' + originPath);
     }
 };

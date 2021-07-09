@@ -137,30 +137,66 @@ BstScreenShooter.prototype.processSingle = function(type, element) {
         hasBackupToRestore = true;
         // 备份源文件
         backupPath = self.util.backupFile(skeletonPath);
-        self.util.readHexFile(skeletonPath, function(data, path) {
+        self.util.readFileToBuffer(skeletonPath, function(data, path) {
+
+            let offset = 0;
+            function updateStrLen(buf, idx, diff) {
+                //string length is saved right before string value
+                const oldVal = buf.readInt32LE(idx - 4);
+                buf.writeInt32LE(oldVal + diff, idx - 4);
+
+                offset += diff;
+            }
+
+            const matLenDiff = element['material'].length - element['col1Material'].length;
+            data = self.util.replaceAllBytes(data, element['col1Material'], element['material'], (buf, idx) => updateStrLen(buf, idx, matLenDiff));
+
+            const colLenDiff = element['col'].length - 'col1'.length;
+            data = self.util.replaceAllBytes(data, 'col1', element['col'], (buf, idx) => updateStrLen(buf, idx, colLenDiff));
+
+            //if data offsets have changed, rewrite the header positions
+            if (offset > 0) {
+                let origOffset;
+                origOffset = data.readInt32LE(BstConst.UPK_OFFSET_EXPORTS);
+                data.writeInt32LE(origOffset + offset, BstConst.UPK_OFFSET_EXPORTS);
+
+                origOffset = data.readInt32LE(BstConst.UPK_OFFSET_IMPORTS);
+                data.writeInt32LE(origOffset + offset, BstConst.UPK_OFFSET_IMPORTS);
+            }
+
+
             // 将col1的配色upk名 替换成 非col1的配色upk名
-            data = self.util.replaceStrAll(data, self.util.strUtf8ToHex(element['col1Material']), self.util.strUtf8ToHex(element['material']));
+            //data = self.util.replaceStrAll(data, self.util.strUtf8ToHex(element['col1Material']), self.util.strUtf8ToHex(element['material']));
             // 将col1 替换成 非col1配色的colId
-            data = self.util.replaceStrAll(data, self.util.strUtf8ToHex('col1'), self.util.strUtf8ToHex(element['col']));
+            //data = self.util.replaceStrAll(data, self.util.strUtf8ToHex('col1'), self.util.strUtf8ToHex(element['col']));
+
+            //const pos = parseInt('0x' + data.substring(37*2, 37*2 + 4*2), 16);
+
             // 储存文件到 skeletonPath
-            self.util.writeHexFile(path, data);
+            self.util.writeFile(path, data);
             self.grunt.log.writeln('[BstScreenShooter] Skeleton file edited: ' + skeletonPath);
             // 执行下一步
             handleUmodel();
         });
     };
 
+    const newFormat = true;
+
     // 将upk文件使用umodel进行可视化
     var handleUmodel = function() {
+        const cmd = `umodel.exe -view -meshes -path="${path.dirname(skeletonPath)}" -game=bns ${element['skeleton']}`;
+        self.grunt.log.writeln('[BstScreenShooter] Run: ' + cmd);
         var worker = cp.exec(
-            'umodel.exe -view -meshes -path="' + path.dirname(skeletonPath) + '" -game=bns ' + element['skeleton'],
+            cmd,
             {"cwd": './resources/umodel/'}
         );
         worker.stdout.on('data', function (data) { self.util.logChildProcessStdout(data); });
         worker.stderr.on('data', function (data) {
             self.util.logChildProcessStderr(data);
             // 取消之后的截图工作，因为umodel出错了，骨骼预览根本没出来
-            clearTimeout(umodelShotTimer);
+            if (!newFormat) {
+                clearTimeout(umodelShotTimer);
+            }
             if (element['col'] !== 'col1') {
                 // 出错了，而且当前material并非col1，则直接将col1的图拷贝过来
                 var imgBasePath = path.join('database', type,  'pics');
@@ -172,15 +208,24 @@ BstScreenShooter.prototype.processSingle = function(type, element) {
                     );
                 }
             }
-            handleBackup();
+            if (!newFormat) {
+                handleBackup();
+            }
         });
         worker.on('exit', function (code) { self.util.logChildProcessExit('umodel', code); });
-        //Start the next job at intervals, because the worker child process will not exit during the opening of the umodel window, and the process cannot continue.
-        // 间隔启动下一个工作，因为在umodel窗口打开期间，worker子进程是不会退出的，流程无法继续执行下去
-        var umodelShotTimer = setTimeout(function() {
-            handleWinSize();
-        }, self.shotInterval); 
+
+        if (newFormat) {
+            handleExport(worker.pid);
+        }else{
+            //Start the next job at intervals, because the worker child process will not exit during the opening of the umodel window, and the process cannot continue.
+            // 间隔启动下一个工作，因为在umodel窗口打开期间，worker子进程是不会退出的，流程无法继续执行下去
+            var umodelShotTimer = setTimeout(function() {
+                handleWinSize();
+            }, self.shotInterval);
+        } 
     };
+
+
 
     var xPos = 100, yPos = 0, width = 500, height = 600;
     // 使用nircmd调整可视化骨骼的窗口位置及大小
@@ -222,6 +267,21 @@ BstScreenShooter.prototype.processSingle = function(type, element) {
         worker.stderr.on('data', function (data) { self.util.logChildProcessStderr(data); });
         worker.on('exit', function (code) {
             self.util.logChildProcessExit('nircmd win close', code);
+            handleBackup();
+        });
+    };
+    
+    var handleExport = function(pid) {
+        const cmd = `ExportTool ${pid} ${2000} ${width} ${height} "${outputPath}"`;
+        self.grunt.log.writeln('[BstScreenShooter] Run: ' + cmd);
+        var worker = cp.exec(
+            cmd,
+            {"cwd": './VS_GUI/ExportTool/bin/Debug/'}
+        );
+        worker.stdout.on('data', function (data) { self.util.logChildProcessStdout(data); });
+        worker.stderr.on('data', function (data) { self.util.logChildProcessStderr(data); });
+        worker.on('exit', function (code) {
+            self.util.logChildProcessExit('ExportTool', code);
             handleBackup();
         });
     };
