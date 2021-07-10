@@ -662,43 +662,47 @@ BstUpkParser.prototype.preProcessMaterial = function() {
             );
             // 会有很多情况下核心col信息是一个非"colX"的格式，循环查询后续的行内容，直到找到我们要的内容
             // There will be many cases where the core col information is in a format other than "colX", and the content of the subsequent rows is cyclically queried until the content we want is found
-            if (colInfo.match(/col\d+/) === null) { 
+            if (colInfo.match(/^col\d$/) === null) { 
                 for (const line of upkLog) {
                     var coreMatch = line.match(/Loading\sMaterialInstanceConstant\s(.+)\sfrom\spackage\s\d+.upk/);
-                    if (coreMatch !== null && self.util.formatCol(coreMatch[1]).match(/col\d+/) !== null) {
+                    if (coreMatch !== null && self.util.formatCol(coreMatch[1]).match(/^col\d$/) !== null) {
                         colInfo = self.util.formatCol(coreMatch[1]);
                     }
                 }
             }
-            for (const line of upkLog) {
-                var textureMatch = line.match(/Loading\sTexture2D\s(.+)\sfrom\spackage\s(\d+).upk/);
-                if (textureMatch !== null) {
-                    var textureObjId = textureMatch[1];
-                    var textureUpkId = textureMatch[2];
+            if (colInfo.match(/^col\d$/) === null) {
+                self.grunt.log.writeln('[BstUpkParser] Skipping material, invalid col: ' + colInfo);
+            } else {
+                for (const line of upkLog) {
+                    var textureMatch = line.match(/Loading\sTexture2D\s(.+)\sfrom\spackage\s(\d+).upk/);
+                    if (textureMatch !== null) {
+                        var textureObjId = textureMatch[1];
+                        var textureUpkId = textureMatch[2];
 
-                    if (textureId === null // 只记录第一个出现的Texture2D的upk id
-                        && BstConst.UPK_INVALID_TEXTURE_UPK_IDS.indexOf(textureUpkId) === -1) { // 且该upk id并不在黑名单上
-                        textureId = textureUpkId;
-                    }
-                    if (!textureObjs.hasOwnProperty(textureUpkId)) {
-                        textureKeys.push(textureUpkId);
-                        textureObjs[textureUpkId] = [];
-                    }
-                    textureObjs[textureUpkId].push(textureObjId);
-                }
-            }
-            if (textureId === null) {
-                // 查找是否有某个skeleton在使用当前的material upk，如果找到，才记录错误信息
-                var foundMaterialUsage = false;
-                for (const element of Object.values(self.upkDataSkeleton)) {
-                    if (element['col1Material'] == upkId) {
-                        foundMaterialUsage = true;
+                        if (textureId === null // 只记录第一个出现的Texture2D的upk id
+                            && BstConst.UPK_INVALID_TEXTURE_UPK_IDS.indexOf(textureUpkId) === -1) { // 且该upk id并不在黑名单上
+                            textureId = textureUpkId;
+                        }
+                        if (!textureObjs.hasOwnProperty(textureUpkId)) {
+                            textureKeys.push(textureUpkId);
+                            textureObjs[textureUpkId] = [];
+                        }
+                        textureObjs[textureUpkId].push(textureObjId);
                     }
                 }
-                if (foundMaterialUsage) {
-                    self.utilBuildMaterialInvalidInfo(upkId);
-                    self.upkDataMaterialInvalid[upkId]['notFound'].push('texture');
-                    self.grunt.log.error('[BstUpkParser] Texture info not found in material upk data: ' + upkId);
+                if (textureId === null) {
+                    // 查找是否有某个skeleton在使用当前的material upk，如果找到，才记录错误信息
+                    var foundMaterialUsage = false;
+                    for (const element of Object.values(self.upkDataSkeleton)) {
+                        if (element['col1Material'] == upkId) {
+                            foundMaterialUsage = true;
+                        }
+                    }
+                    if (foundMaterialUsage) {
+                        self.utilBuildMaterialInvalidInfo(upkId);
+                        self.upkDataMaterialInvalid[upkId]['notFound'].push('texture');
+                        self.grunt.log.error('[BstUpkParser] Texture info not found in material upk data: ' + upkId);
+                    }
                 }
             }
         }
@@ -811,70 +815,11 @@ BstUpkParser.prototype.buildData = function(skeletonKey, skeletonData) {
         return; // 这个skeleton没必要处理下去了，因为缺失texture
     }
 
-    // 检查texture数据
-    if (Object.keys(textureData['materials']).length == 0) {
-        self.grunt.log.writeln('[BstUpkParser] No materials info collected for texture: ' + textureId + ', scanning all upk logs ...');
-        /**
-         * 没有为该texture找到对应的material数据，可能某些描述material信息的upk文件，在关键行[2]里没有以 MaterialInstanceConstant
-         * 的格式进行描述，参考例子：
-         * skeleton：00017488，texture：00017486，material：00017487
-         * material关键行为：Loading Material3 Basic_FX from package 00017487.upk
-         * 或
-         * 贴图数据在预处理的时候没找到，是被定义在 BstConst.UPK_PRE_DEFINED_TEXTURE_INFO 里的，那么这个贴图数据就肯定没有对应的material数据
-         * 这里我们需要全局重新扫描upk文件，查找拥有两个关键特征的upk文件：
-         * 1. 文件中拥有材质信息：
-         *     Loading MaterialInstanceConstant col1 from package 00017487.upk
-         * 2. 文件中拥有贴图信息：
-         *     Loading Texture2D 60071_GonM_col1_N from package 00017486.upk
-         *     Loading Texture2D 60071_GonM_col1_M from package 00017486.upk
-         *     Loading Texture2D 60071_GonM_col1_D from package 00017486.upk
-         *     Loading Texture2D 60071_GonM_col1_S from package 00017486.upk
-         */
-        for (const scanUpkId of self.upkIdsRescanMaterial) {
-            var scanUpkPath = path.join(BstConst.PATH_UPK_LOG, scanUpkId + '.log');
-            var scanUpkLog = self.util.readFileSplitWithLineBreak(scanUpkPath);
-
-            var scanMaterialInfo = null;
-            var foundMaterial3Info = false;
-            var foundTextureInfo = false;
-
-            for (const scanLine of scanUpkLog) {
-                var scanMaterialMatch = scanLine.match(new RegExp("Loading\\sMaterialInstanceConstant\\s(.+)\\sfrom\\spackage\\s" + scanUpkId + ".upk"));
-                if (scanMaterialInfo === null && scanMaterialMatch !== null) {
-                    // 只需要查找第一个找到的material信息
-                    scanMaterialInfo = self.util.formatCol(scanMaterialMatch[1]);
-                }
-                var scanTextureMatch = scanLine.match(new RegExp("Loading\\sTexture2D\\s.+\\sfrom\\spackage\\s" + textureId + ".upk"));
-                if (scanTextureMatch !== null) {
-                    foundTextureInfo = true;
-                }
-            }
-
-            if (scanMaterialInfo === null) {
-                // 部分材质upk在关键行[2]里的描述是 Material3 colX，这里也一并检查，参考：material：00019772
-                var scanCoreMatch = scanUpkLog[BstConst.UPK_ENTRANCE_LINE_NO].match(new RegExp("Loading\\sMaterial3\\s(.+)\\sfrom\\spackage\\s" + scanUpkId + ".upk"));
-                if (scanCoreMatch !== null && self.util.formatCol(scanCoreMatch[1]).match(/col\d+/) !== null) {
-                    scanMaterialInfo = self.util.formatCol(scanCoreMatch[1]);
-                    foundMaterial3Info = true;
-                }
-            }
-
-            if (scanMaterialInfo !== null && foundTextureInfo) {
-                // 两项条件全部满足，更新textureData['materials']数据
-                textureData['materials'][scanMaterialInfo] = scanUpkId;
-                // 因为关键字为 Material3 的材质信息肯定没有被收录在 self.upkDataSkeleton 的 col1Material 里，这里需要一并更新
-                if (scanMaterialInfo === 'col1' && foundMaterial3Info) {
-                    skeletonData['col1Material'] = scanUpkId;
-                    self.upkDataSkeleton[skeletonKey]['col1Material'] = scanUpkId;
-                }
-            }
-        }
-    }
     if (Object.keys(textureData['materials']).length == 0) {
         // 仍旧没有找到贴图对应的材质upk信息
         self.utilBuildDataInvalidInfo(skeletonType, skeletonCode);
         self.dbInvalid[skeletonType][skeletonCode]['invalid'].push('texture:[skeleton:' + skeletonId + ',texture:' + textureId + ']');
-        self.grunt.log.error('[BstUpkParser] Texture has no materials data, code: ' + skeletonCode +
+        self.grunt.log.warn('[BstUpkParser] Texture has no materials data, code: ' + skeletonCode +
             ', skeleton: ' + skeletonId + ', texture: ' + textureId);
         return; // 当前的texture没有对应的material
     }

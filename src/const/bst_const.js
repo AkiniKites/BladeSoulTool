@@ -34,9 +34,6 @@ BstConst.RACE_VALID = ['곤', '건', '진', '린'];
 //------------------------------------------------------------------------
 //- UPK
 //------------------------------------------------------------------------
-BstConst.UPK_OFFSET_EXPORTS = 37;
-BstConst.UPK_OFFSET_IMPORTS = 45;
-
 BstConst.UPK_NO_OBJ_ERROR = 'Specified package(s) has no supported objects';
 BstConst.UPK_UNKNOWN_MEMBER_ERROR = '*** unknown member';
 
