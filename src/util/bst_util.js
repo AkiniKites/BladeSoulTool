@@ -287,7 +287,7 @@ BstUtil.prototype.cancelAsyncEvent = function(eventName) {
 };
 
 BstUtil.prototype.startToListenAsyncList = function(callback) {
-    var self = this;
+    const self = this;
     var timer = setInterval(function() {
         if (self.asyncList.length == 0) { // all done
             self.grunt.log.writeln('[BstUtil] Async event list done.');
@@ -311,7 +311,7 @@ BstUtil.prototype.printJson = function(json) {
 };
 
 BstUtil.prototype.fileDownload = function(url, filepath, callback, headers) {
-    var self = this;
+    const self = this;
     self.grunt.log.writeln('[BstUtil] Start to download file: ' + url);
 
     var errReport = function(err) {
@@ -430,7 +430,7 @@ BstUtil.prototype.formatCode = function(code) { // 删掉code开头的0字符串
 };
 
 BstUtil.prototype.dataKeyCheck = function(element) {
-    var self = this;
+    const self = this;
 
     var hasInvalidKey = false;
     var elementKeys = Object.keys(element);

@@ -40,7 +40,7 @@ BstRestore.prototype.start = function() {
 };
 
 BstRestore.prototype.processRestore = function() {
-    var self = this;
+    const self = this;
     if (self.backup['restore'].length > 0) {
         // 恢复文件
         for (const backupPath of self.backup['restore']) {
@@ -56,7 +56,7 @@ BstRestore.prototype.processRestore = function() {
 };
 
 BstRestore.prototype.processDelete = function() {
-    var self = this;
+    const self = this;
     if (self.backup['delete'].length > 0) {
         for (const deletePath of self.backup['delete']) {
             var dir = path.dirname(deletePath);

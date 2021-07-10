@@ -54,7 +54,7 @@ BstScreenShooter.prototype.process = function(type) {
 };
 
 BstScreenShooter.prototype.processType = function(type) {
-    var self = this;
+    const self = this;
 
     self.workingList = Object.keys(self.data);
     self.statusTotalCount = self.workingList.length;
@@ -102,7 +102,7 @@ BstScreenShooter.prototype.processType = function(type) {
 };
 
 BstScreenShooter.prototype.processSingle = function(type, element) {
-    var self = this;
+    const self = this;
 
     var name = element.core + '_' + element.col;
     self.grunt.log.writeln('[BstScreenShooter] Start to process: ' + name);

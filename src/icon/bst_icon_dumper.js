@@ -35,7 +35,7 @@ var BstIconDumper = function(grunt, done) {
 };
 
 BstIconDumper.prototype.start = function() {
-    var self = this;
+    const self = this;
 
     self.util.printHr();
     self.grunt.log.writeln('[BstIconDumper] Start to dump all icon resources ...');
@@ -61,7 +61,7 @@ BstIconDumper.prototype.start = function() {
 };
 
 BstIconDumper.prototype.process = function() {
-    var self = this;
+    const self = this;
 
     // Clean up tga copy folder
     if (self.grunt.file.exists(BstConst.PATH_ICON_TGA)) {
@@ -125,7 +125,7 @@ BstIconDumper.prototype.process = function() {
 };
 
 BstIconDumper.prototype.processTgaConvert = function(tgaFileName) {
-    var self = this;
+    const self = this;
 
     self.startConvert(tgaFileName);
 

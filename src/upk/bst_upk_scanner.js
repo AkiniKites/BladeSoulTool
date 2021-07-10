@@ -35,7 +35,7 @@ var BstUpkScanner = function(grunt, done) {
 };
 
 BstUpkScanner.prototype.start = function() {
-    var self = this;
+    const self = this;
 
     self.util.printHr();
     self.grunt.log.writeln('[BstUpkScanner] Start to scan upk files ...');
@@ -60,7 +60,7 @@ BstUpkScanner.prototype.start = function() {
 };
 
 BstUpkScanner.prototype.process = function() {
-    var self = this;
+    const self = this;
 
     var workingTimer = setInterval(function() {
         if (self.statusWorkingChildProcess < self.childProcess // 有空余的进程数
@@ -76,7 +76,7 @@ BstUpkScanner.prototype.process = function() {
 };
 
 BstUpkScanner.prototype.processSingle = function(upkPath) {
-    var self = this;
+    const self = this;
 
     self.startProcess(upkPath);
 

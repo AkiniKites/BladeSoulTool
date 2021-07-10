@@ -25,7 +25,7 @@ var BstUpkEnvPreparer = function(grunt, done, forceDedat) {
 };
 
 BstUpkEnvPreparer.prototype.start = function() {
-    var self = this;
+    const self = this;
 
     /**
      * 在分析mesh.xml的upk信息的时候，我们需要对upk进行解包，

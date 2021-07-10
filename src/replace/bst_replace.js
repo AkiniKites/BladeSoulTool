@@ -91,7 +91,7 @@ BstReplace.prototype.process = function() {
 };
 
 BstReplace.prototype.processCostumeAndAttach = function() {
-    var self = this;
+    const self = this;
 
     // 准备目标模型upk路径，并验证存在，只需要骨骼和材质文件
     var paths = {

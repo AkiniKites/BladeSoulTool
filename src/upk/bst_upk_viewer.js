@@ -27,7 +27,7 @@ var BstUpkViewer = function(grunt, done) {
 };
 
 BstUpkViewer.prototype.start = function(partType, elementId) {
-    var self = this;
+    const self = this;
 
     self.util.printHr();
     self.grunt.log.writeln('[BstUpkViewer] Start view upk ...');

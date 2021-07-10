@@ -42,7 +42,7 @@ var BstPngOptimizer = function(grunt, done) {
 };
 
 BstPngOptimizer.prototype.start = function() {
-    var self = this;
+    const self = this;
 
     self.util.printHr();
     self.grunt.log.writeln('[BstPngOptimizer] Start to optimize png files ...');
@@ -98,7 +98,7 @@ BstPngOptimizer.prototype.start = function() {
 };
 
 BstPngOptimizer.prototype.processTask = function() {
-    var self = this;
+    const self = this;
 
     var workingTimer = setInterval(function() {
         if (self.statusWorkingChildProcess < self.childProcess // 有空余的进程数
@@ -121,7 +121,7 @@ BstPngOptimizer.prototype.finishTask = function() {
 };
 
 BstPngOptimizer.prototype.processCompress = function(pngFilePath) {
-    var self = this;
+    const self = this;
 
     var pngFileName = path.basename(pngFilePath);
     self.startProcess(pngFileName);
