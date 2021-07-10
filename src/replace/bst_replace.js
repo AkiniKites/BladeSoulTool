@@ -1,15 +1,15 @@
 "use strict";
 
-var path = require('path');
+const path = require('path');
 
 /**
  * @type {BstUtil|exports}
  */
-var BstUtil = require('../util/bst_util.js');
+const BstUtil = require('../util/bst_util.js');
 /**
  * @type {BstConst|exports}
  */
-var BstConst = require('../const/bst_const.js');
+const BstConst = require('../const/bst_const.js');
 
 var BstReplace = function(grunt, done) {
     this.grunt    = grunt;
@@ -49,7 +49,7 @@ BstReplace.prototype.start = function(part, race, modelId) {
     }
 
     // 确定原始模型数据
-    var originCollection = this.util.readJsonFile('./database/' + this.part + '/data/origin.json');
+    let originCollection = this.util.readJsonFile('./database/' + this.part + '/data/origin.json');
     if (part === BstConst.PART_TYPE_COSTUME || part === BstConst.PART_TYPE_ATTACH) { // 替换时装 或 饰品
         if (race === null) { // 没有提供种族信息
             this.grunt.fail.fatal('[BstReplace] No race info given when replace costume | attach ...');
@@ -94,12 +94,12 @@ BstReplace.prototype.processCostumeAndAttach = function() {
     const self = this;
 
     // 准备目标模型upk路径，并验证存在，只需要骨骼和材质文件
-    var paths = {
+    let paths = {
         "skeleton": self.util.findUpkPath(self.targetModelInfo['skeleton']),
         "material": self.util.findUpkPath(self.targetModelInfo['material'])
     };
     // 检查路径
-    for (var checkKey in paths) {
+    for (let checkKey in paths) {
         if (!paths.hasOwnProperty(checkKey)) {
             continue;
         }
@@ -116,21 +116,21 @@ BstReplace.prototype.processCostumeAndAttach = function() {
 
     // 拷贝目标upk到working路径下，并重命名为原始模型的upk名
     for (const [copyKey, copyPath] of Object.entries(paths)) {
-        var workingPath = path.join('working', self.originModelInfo[copyKey] + '.upk');
+        let workingPath = path.join('working', self.originModelInfo[copyKey] + '.upk');
         self.util.copyFile(copyPath, workingPath);
         paths[copyKey] = workingPath;
     }
     self.util.printHr();
 
     // 检查原始模型为多色的情况
-    var colMatch = self.originModelInfo['col'].match(/^col(\d+)/i);
+    let colMatch = self.originModelInfo['col'].match(/^col(\d+)/i);
     if (self.originModelInfo['core'].match(/(KunN|JinF|JinM|GonF|GonM|LynF|LynM)_\d+/i) === null // 头发不需要做这步检查
         && colMatch !== null && parseInt(colMatch[1]) > 1) {
-        var multiColMaterialIds = {}; // colX => material upk id
+        let multiColMaterialIds = {}; // colX => material upk id
         // 是多色
         self.grunt.log.writeln('[BstReplace] Origin model is multi color status, col: ' + self.originModelInfo['col']);
         // 查找相同core的模型
-        var filtered = Object.values(self.dataCollection).filter(function(element) { // filtered里面肯定有东西，至少原始模型自己在里面
+        let filtered = Object.values(self.dataCollection).filter(function(element) { // filtered里面肯定有东西，至少原始模型自己在里面
             return element['core'] === self.originModelInfo['core'];
         });
         for (const element of filtered) {
@@ -141,28 +141,28 @@ BstReplace.prototype.processCostumeAndAttach = function() {
         self.grunt.log.writeln('[BstReplace] Origin model related other col materials: ' + self.util.formatJson(multiColMaterialIds));
         multiColMaterialIds = Object.values(multiColMaterialIds); // 重新获取所有的路径，后续工作只需要路径
         // 拷贝并重命名目标模型材质文件为原始模型的多色材质名
-        var targetMaterialPath = self.util.findUpkPath(self.targetModelInfo['material']); // 路径在之前已经验证过了，这里不需要再验证
+        let targetMaterialPath = self.util.findUpkPath(self.targetModelInfo['material']); // 路径在之前已经验证过了，这里不需要再验证
         for (const multiMaterialUpkId of multiColMaterialIds) {
-            var workingPath = path.join('working', multiMaterialUpkId + '.upk');
+            let workingPath = path.join('working', multiMaterialUpkId + '.upk');
             self.util.copyFile(targetMaterialPath, workingPath);
         }
         self.util.printHr();
     }
 
     // 修改内容
-    for (var editKey in paths) { // skeleton | material
+    for (let editKey in paths) { // skeleton | material
         if (!paths.hasOwnProperty(editKey)) {
             continue;
         }
         self.util.registerAsyncEvent(paths[editKey]);
         self.util.readHexFile(paths[editKey], function(data, editPath) {
-            var editPart = Object.keys(paths.findByVal(editPath))[0]; // skeleton | material
+            let editPart = Object.keys(paths.findByVal(editPath))[0]; // skeleton | material
             self.grunt.log.writeln('[BstReplace] Start to handle "' + editPart + '" file: ' + editPath);
 
             if (editPart === 'skeleton') { // 骨骼内容修改
 
-                var targetCore = self.targetModelInfo['core'];
-                var originCore = self.originModelInfo['core'];
+                let targetCore = self.targetModelInfo['core'];
+                let originCore = self.originModelInfo['core'];
 
                 // 替换头发的话，有几个模型的规则和普通的不通，需要添加前缀 "Hair_"
                 targetCore = self.util.buildSpecialHairCore(targetCore);
@@ -171,8 +171,8 @@ BstReplace.prototype.processCostumeAndAttach = function() {
                 self.grunt.log.writeln('[BstReplace] Origin Core: ' + originCore);
 
                 // 获取目标模型核心名（即会被替换掉的）在文件中出现次数，之后可能会用来计算长度差
-                var targetCoreFoundCount = self.util.findStrCount(data, self.util.buildHexCoreStrWithHexNull(targetCore));
-                var targetCorePhysicsFoundCount = self.util.findStrCount(data, self.util.buildHexCoreStrWithHexNull(targetCore + BstConst.UPK_CORE_PHYSICS_SUFFIX));
+                let targetCoreFoundCount = self.util.findStrCount(data, self.util.buildHexCoreStrWithHexNull(targetCore));
+                let targetCorePhysicsFoundCount = self.util.findStrCount(data, self.util.buildHexCoreStrWithHexNull(targetCore + BstConst.UPK_CORE_PHYSICS_SUFFIX));
                 self.grunt.log.writeln('[BstReplace] Target core found times: ' + targetCoreFoundCount);
                 self.grunt.log.writeln('[BstReplace] Target core with Physics found times: ' + targetCorePhysicsFoundCount);
 
@@ -182,7 +182,7 @@ BstReplace.prototype.processCostumeAndAttach = function() {
                 // = 0：表示双方长度一致，不需要额外操作
                 // < 0：表示目标长度比原始长度短，修改完成文件长度会变长（短改长：需要额外操作删掉upk内部分内容）
                 // > 0：表是目标长度比原始长度长，修改完成文件长度会变短（长改短：需要额外操作以HEX空字符补足长度）
-                var delta = targetCore.length - originCore.length;
+                let delta = targetCore.length - originCore.length;
                 self.grunt.log.writeln('[BstReplace] Core delta: ' + delta);
 
                 if (delta == 0) {
@@ -191,7 +191,7 @@ BstReplace.prototype.processCostumeAndAttach = function() {
                     data = self.util.replaceStrAll(data, self.util.buildHexCoreStrWithHexNull(targetCore + BstConst.UPK_CORE_PHYSICS_SUFFIX), self.util.buildHexCoreStrWithHexNull(originCore + BstConst.UPK_CORE_PHYSICS_SUFFIX));
                 } else if (delta < 0) {
                     self.grunt.log.writeln('[BstReplace] Short to long edit ...');
-                    var shortenLength = Math.abs(delta * (targetCoreFoundCount + targetCorePhysicsFoundCount));
+                    let shortenLength = Math.abs(delta * (targetCoreFoundCount + targetCorePhysicsFoundCount));
                     if (shortenLength > BstConst.UPK_REPLACE_SHORT_TO_LONG_LIMIT) {
                         self.grunt.fail.fatal('[BstReplace] Upk replacement character length change exceed the limit, from origin core: ' + originCore + ', to target core: ' + targetCore);
                     }
@@ -199,9 +199,9 @@ BstReplace.prototype.processCostumeAndAttach = function() {
                     data = self.util.replaceStrAll(data, self.util.buildHexCoreStrWithHexNull(targetCore), self.util.buildHexCoreStrWithHexNull(originCore));
                     data = self.util.replaceStrAll(data, self.util.buildHexCoreStrWithHexNull(targetCore + BstConst.UPK_CORE_PHYSICS_SUFFIX), self.util.buildHexCoreStrWithHexNull(originCore + BstConst.UPK_CORE_PHYSICS_SUFFIX));
                     // 修改长度
-                    var upkFileNameCanbeModified = self.targetModelInfo[editPart];
-                    var shortenedName = '';
-                    for (var i = 0; i < BstConst.UPK_REPLACE_SHORT_TO_LONG_LIMIT - shortenLength; i++) {
+                    let upkFileNameCanbeModified = self.targetModelInfo[editPart];
+                    let shortenedName = '';
+                    for (let i = 0; i < BstConst.UPK_REPLACE_SHORT_TO_LONG_LIMIT - shortenLength; i++) {
                         shortenedName += '0'; // 改短的占位名无所谓什么内容，用字符串0来占位
                     }
                     self.grunt.log.writeln('[BstReplace] Shorten upk file name from: ' + upkFileNameCanbeModified + ', to: ' + shortenedName);
@@ -249,8 +249,8 @@ BstReplace.prototype.processCostumeAndAttach = function() {
              * 因为只有一层文件夹结构，所以不用担心多层嵌套问题
              */
             if (filename === 'working_dir') { return; } // 忽略占位文件
-            var targetTencentPath = path.join(self.util.getTencentPath(), BstConst.PATH_TENCENT_SUB_DIR, filename); // 目标文件位置
-            var targetTencentBackupPath = self.util.getBackupFilePathViaOriginPath(targetTencentPath); // 目标文件的备份位置
+            let targetTencentPath = path.join(self.util.getTencentPath(), BstConst.PATH_TENCENT_SUB_DIR, filename); // 目标文件位置
+            let targetTencentBackupPath = self.util.getBackupFilePathViaOriginPath(targetTencentPath); // 目标文件的备份位置
             if (self.grunt.file.exists(targetTencentBackupPath)) {
                 // 已经存在备份，直接覆盖。有备份文件，则肯定在backup.json里有数据
                 self.util.copyFile(abspath, targetTencentPath);

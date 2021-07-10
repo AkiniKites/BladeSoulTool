@@ -97,6 +97,7 @@ BstUtil.prototype.mkdir = function(path) {
     }
 };
 
+// eslint-disable-next-line no-unused-vars
 BstUtil.prototype.logChildProcessStdout = function(data) {
     // this.grunt.log.writeln('[BstUtil] process: stdout: ' + data); // Too many info
 };

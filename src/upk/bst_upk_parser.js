@@ -1,7 +1,5 @@
 "use strict";
 
-const fs = require('fs');
-const cp = require('child_process');
 const path = require('path');
 const xml2js = require('xml2js');
 
@@ -439,7 +437,7 @@ BstUpkParser.prototype.preProcessSkeleton = function() {
          * ClassName: SkeletalMesh3 ObjectName: 990031_autoscale => 990031_autoscale
          * ClassName: SkeletalMesh3 ObjectName: JinF_043 => JinF_043
          */
-        let core = self.upkIdsLines[upkId].match(/ClassName\:\sSkeletalMesh3\sObjectName\:\s(.+)/)[1];
+        let core = self.upkIdsLines[upkId].match(/ClassName:\sSkeletalMesh3\sObjectName:\s(.+)/)[1];
         let code = core.match(/(\d+)/);
         if (code !== null) {
             code = code[1];
@@ -454,7 +452,7 @@ BstUpkParser.prototype.preProcessSkeleton = function() {
             race = self.util.formatRawCode(race[1]); // 转换大小写
         } else {
             if (core.match(/\d+_Autoscale/i) !== null
-                || self.upkIdsLines[upkId].match( /ClassName\:\sSkeletalMesh3\sObjectName\:\s(.+)/) !== null) {
+                || self.upkIdsLines[upkId].match( /ClassName:\sSkeletalMesh3\sObjectName:\s(.+)/) !== null) {
                 // 是武器upk，core信息里不包含race，正常
             } else {
                 self.utilBuildSkeletonInvalidInfo(upkId);
@@ -658,7 +656,7 @@ BstUpkParser.prototype.preProcessMaterial = function() {
             let upkLog = self.util.readFileSplitWithLineBreak(path.join(BstConst.PATH_UPK_LOG, upkId + '.log'));
 
             colInfo = self.util.formatCol( // 先读取核心行的数据，查找colInfo
-                self.upkIdsLines[upkId].match(/ClassName\:\sMaterialInstanceConstant\sObjectName\:\s(.+)/)[1]
+                self.upkIdsLines[upkId].match(/ClassName:\sMaterialInstanceConstant\sObjectName:\s(.+)/)[1]
             );
             // 会有很多情况下核心col信息是一个非"colX"的格式，循环查询后续的行内容，直到找到我们要的内容
             // There will be many cases where the core col information is in a format other than "colX", and the content of the subsequent rows is cyclically queried until the content we want is found
@@ -1027,7 +1025,7 @@ BstUpkParser.prototype.utilRecognizeSkeletonType = function(skeletonId, upkLog) 
     } else if (coreLineOfContent.match(/\d+_Autoscale/i) !== null) {
         // weapon with autoscale
         return BstConst.PART_TYPE_WEAPON;
-    } else if (coreLineOfContent.match(/ClassName\:\sSkeletalMesh3\sObjectName\:(\d+)/) !== null) {
+    } else if (coreLineOfContent.match(/ClassName:\sSkeletalMesh3\sObjectName:(\d+)/) !== null) {
         // weapon with numeric id
         return BstConst.PART_TYPE_WEAPON;
     } else if (coreLineOfContent.match(/(KunN|JinF|JinM|GonF|GonM|LynF|LynM)_\d+/i) !== null) {
