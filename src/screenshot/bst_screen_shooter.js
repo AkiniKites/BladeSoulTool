@@ -20,7 +20,7 @@ var BstScreenShooter = function(grunt, overwrite, done) {
     this.taskDone  = done; // notify grunt: tasks done
 
     this.conf = this.util.readJsonFile('./config/setting.json');
-    this.shotInterval = this.conf['umodel_shooter']['interval'];
+    this.shotInterval = this.conf.umodel_shooter.interval;
 
     this.types = BstConst.PART_TYPES; // 需要处理的数据类型
 
@@ -104,7 +104,7 @@ BstScreenShooter.prototype.processType = function(type) {
 BstScreenShooter.prototype.processSingle = function(type, element) {
     var self = this;
 
-    var name = element['core'] + '_' + element['col'];
+    var name = element.core + '_' + element.col;
     self.grunt.log.writeln('[BstScreenShooter] Start to process: ' + name);
 
     // 确保当前元素的格式是规范的
@@ -114,7 +114,7 @@ BstScreenShooter.prototype.processSingle = function(type, element) {
     }
 
     // 确保skeleton文件存在
-    var skeletonPath = self.util.findUpkPath(element['skeleton'], function() {
+    var skeletonPath = self.util.findUpkPath(element.skeleton, function() {
         self.finishSingle(name); // 即便文件不存在，也要将其标记为完成
     });
     if (skeletonPath === null) {
@@ -138,12 +138,8 @@ BstScreenShooter.prototype.processSingle = function(type, element) {
         // 备份源文件
         backupPath = self.util.backupFile(skeletonPath);
         self.util.readFileToBuffer(skeletonPath, function(data, path) {
-
-            const matLenDiff = element['material'].length - element['col1Material'].length;
-            data = self.util.replaceAllBytes(data, element['col1Material'], element['material'], (buf, idx) => updateStrLen(buf, idx, matLenDiff));
-
-            const colLenDiff = element['col'].length - 'col1'.length;
-            data = self.util.replaceAllBytes(data, 'col1', element['col'], (buf, idx) => updateStrLen(buf, idx, colLenDiff));
+            data = self.util.replaceAllBytes(data, element.col1Material, element.material);
+            data = self.util.replaceAllBytes(data, 'col1', element.col);
 
             // 储存文件到 skeletonPath
             self.util.writeFile(path, data);
@@ -155,7 +151,7 @@ BstScreenShooter.prototype.processSingle = function(type, element) {
 
     // 将upk文件使用umodel进行可视化
     var handleUmodel = function() {
-        const cmd = `umodel.exe -view -meshes -path="${path.dirname(skeletonPath)}" -game=bns ${element['skeleton']}`;
+        const cmd = `umodel.exe -view -meshes -path="${path.dirname(skeletonPath)}" -game=bns ${element.skeleton}`;
         self.grunt.log.writeln('[BstScreenShooter] Run: ' + cmd);
         var worker = cp.exec(
             cmd,
@@ -164,10 +160,10 @@ BstScreenShooter.prototype.processSingle = function(type, element) {
         worker.stdout.on('data', function (data) { self.util.logChildProcessStdout(data); });
         worker.stderr.on('data', function (data) {
             self.util.logChildProcessStderr(data);
-            if (element['col'] !== 'col1') {
+            if (element.col !== 'col1') {
                 // 出错了，而且当前material并非col1，则直接将col1的图拷贝过来
                 var imgBasePath = path.join('database', type,  'pics');
-                var col1ImgPath = path.join(imgBasePath, element['core'] + '_col1.png');
+                var col1ImgPath = path.join(imgBasePath, element.core + '_col1.png');
                 if (self.grunt.file.exists(col1ImgPath)) {
                     self.util.copyFile(
                         col1ImgPath,
@@ -182,7 +178,9 @@ BstScreenShooter.prototype.processSingle = function(type, element) {
     };
     
     var handleExport = function(pid) {
-        const cmd = `ExportTool ${pid} ${2000} ${width} ${height} "${outputPath}"`;
+        const timeout = 1000, width = 500, height = 600;
+
+        const cmd = `ExportTool ${pid} ${timeout} ${width} ${height} "${outputPath}"`;
         self.grunt.log.writeln('[BstScreenShooter] Run: ' + cmd);
         var worker = cp.exec(
             cmd,
@@ -209,7 +207,7 @@ BstScreenShooter.prototype.processSingle = function(type, element) {
     };
 
     // 开始处理
-    if (element['col'] != 'col1') { // 不是默认色调，首先要处理upk文件
+    if (element.col != 'col1') { // 不是默认色调，首先要处理upk文件
         handleUpk();
     } else {
         handleUmodel();
