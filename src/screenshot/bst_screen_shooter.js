@@ -19,7 +19,8 @@ var BstScreenShooter = function(grunt, overwrite, done) {
     this.taskDone  = done; // notify grunt: tasks done
 
     this.conf = this.util.readJsonFile('./config/setting.json');
-    this.shotInterval = this.conf.umodel_shooter.interval;
+    this.childProcess = this.conf['umodel_shooter']['childProcess'];
+    this.cycleInterval = this.conf['umodel_shooter']['cycleInterval'];
 
     this.types = BstConst.PART_TYPES; // 需要处理的数据类型
 
@@ -28,7 +29,7 @@ var BstScreenShooter = function(grunt, overwrite, done) {
 
     this.statusTotalCount = 0; // 总共需要处理的模型个数
     this.statusFinishedCount = 0; // 处理完成的模型个数
-    this.statusIsWorking = false; // 因为需要截图，必须单进程，这里存储是否在工作的状态
+    this.statusWorkingChildProcess = 0;
 
     this.backupList = []; // 存储为了截图修改过的骨骼备份文件，统一删除
 };
@@ -47,7 +48,7 @@ BstScreenShooter.prototype.process = function(type) {
     this.workingList = null;
     this.statusTotalCount = 0;
     this.statusFinishedCount = 0;
-    this.statusIsWorking = false;
+    this.statusWorkingChildProcess = 0;
 
     this.processType(type);
 };
@@ -70,12 +71,11 @@ BstScreenShooter.prototype.processType = function(type) {
     }
 
     var timer = setInterval(function() {
-        while (!self.statusIsWorking && self.workingList.length > 0) {
+        while (self.statusWorkingChildProcess < self.childProcess && self.workingList.length > 0) {
             // 目前没有运行中的任务，安排任务
-            self.statusIsWorking = true;
             self.processSingle(type, self.data[self.workingList.shift()]);
         }
-        if (!self.statusIsWorking && self.workingList.length == 0) {
+        if (self.statusWorkingChildProcess == 0 && self.workingList.length == 0) {
             // 任务全部完成
             clearInterval(timer);
             self.util.printHr();
@@ -97,13 +97,14 @@ BstScreenShooter.prototype.processType = function(type) {
                 self.taskDone();
             }
         }
-    }, 10);
+    }, this.cycleInterval);
 };
 
 BstScreenShooter.prototype.processSingle = function(type, element) {
     const self = this;
 
-    var name = element.core + '_' + element.col;
+    this.statusWorkingChildProcess++;
+    var name = element['core'] + '_' + element['col'];
     self.grunt.log.writeln('[BstScreenShooter] Start to process: ' + name);
 
     // 确保当前元素的格式是规范的
@@ -113,7 +114,7 @@ BstScreenShooter.prototype.processSingle = function(type, element) {
     }
 
     // 确保skeleton文件存在
-    var skeletonPath = self.util.findUpkPath(element.skeleton, function() {
+    var skeletonPath = self.util.findUpkPath(element['skeleton'], function() {
         self.finishSingle(name); // 即便文件不存在，也要将其标记为完成
     });
     if (skeletonPath === null) {
@@ -137,8 +138,8 @@ BstScreenShooter.prototype.processSingle = function(type, element) {
         // 备份源文件
         backupPath = self.util.backupFile(skeletonPath);
         self.util.readFileToBuffer(skeletonPath, function(data, path) {
-            data = self.util.replaceAllBytes(data, element.col1Material, element.material);
-            data = self.util.replaceAllBytes(data, 'col1', element.col);
+            data = self.util.replaceAllBytes(data, element['col1Material'], element['material']);
+            data = self.util.replaceAllBytes(data, 'col1', element['col']);
 
             // 储存文件到 skeletonPath
             self.util.writeFile(path, data);
@@ -150,7 +151,7 @@ BstScreenShooter.prototype.processSingle = function(type, element) {
 
     // 将upk文件使用umodel进行可视化
     var handleUmodel = function() {
-        const cmd = `umodel.exe -view -meshes -path="${path.dirname(skeletonPath)}" -game=bns ${element.skeleton}`;
+        const cmd = `umodel.exe -view -meshes -path="${path.dirname(skeletonPath)}" -game=bns ${element['skeleton']}`;
         self.grunt.log.writeln('[BstScreenShooter] Run: ' + cmd);
         var worker = cp.exec(
             cmd,
@@ -159,10 +160,10 @@ BstScreenShooter.prototype.processSingle = function(type, element) {
         worker.stdout.on('data', function (data) { self.util.logChildProcessStdout(data); });
         worker.stderr.on('data', function (data) {
             self.util.logChildProcessStderr(data);
-            if (element.col !== 'col1') {
+            if (element['col'] !== 'col1') {
                 // 出错了，而且当前material并非col1，则直接将col1的图拷贝过来
                 var imgBasePath = path.join('database', type,  'pics');
-                var col1ImgPath = path.join(imgBasePath, element.core + '_col1.png');
+                var col1ImgPath = path.join(imgBasePath, element['core'] + '_col1.png');
                 if (self.grunt.file.exists(col1ImgPath)) {
                     self.util.copyFile(
                         col1ImgPath,
@@ -206,7 +207,7 @@ BstScreenShooter.prototype.processSingle = function(type, element) {
     };
 
     // 开始处理
-    if (element.col != 'col1') { // 不是默认色调，首先要处理upk文件
+    if (element['col'] != 'col1') { // 不是默认色调，首先要处理upk文件
         handleUpk();
     } else {
         handleUmodel();
@@ -214,7 +215,7 @@ BstScreenShooter.prototype.processSingle = function(type, element) {
 };
 
 BstScreenShooter.prototype.finishSingle = function(name) {
-    this.statusIsWorking = false;
+    this.statusWorkingChildProcess--;
     this.statusFinishedCount++;
 
     this.grunt.log.writeln('[BstScreenShooter] Processing of "' + name + '" done, ' +
