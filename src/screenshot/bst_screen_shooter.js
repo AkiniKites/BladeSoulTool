@@ -2,6 +2,7 @@
 
 var cp = require('child_process');
 var path = require('path');
+const { nanoid } = require('nanoid')
 
 /**
  * @type {BstUtil|exports}
@@ -69,6 +70,8 @@ BstScreenShooter.prototype.processType = function(type) {
         self.util.deleteDir(targetOutputPath, false); // 文件夹没找到也不要报错
         self.util.mkdir(targetOutputPath);
     }
+    if (!self.grunt.file.exists(targetOutputPath))
+        self.util.mkdir(targetOutputPath);
 
     var timer = setInterval(function() {
         while (self.statusWorkingChildProcess < self.childProcess && self.workingList.length > 0) {
@@ -78,6 +81,7 @@ BstScreenShooter.prototype.processType = function(type) {
         if (self.statusWorkingChildProcess == 0 && self.workingList.length == 0) {
             // 任务全部完成
             clearInterval(timer);
+            self.util.clearWorkingDir();            
             self.util.printHr();
             self.grunt.log.writeln('[BstScreenShooter] All "' + type + '" photo shot.');
             if (self.types.length > 0) {
@@ -85,15 +89,6 @@ BstScreenShooter.prototype.processType = function(type) {
             } else {
                 // 所有数据类型都已处理完毕，任务完成
                 self.grunt.log.writeln('[BstScreenShooter] All types of works done.');
-                // 删除备份文件
-                if (self.backupList.length > 0) {
-                    self.grunt.log.writeln('[BstScreenShooter] Delete backup skeleton upk files.');
-                    self.util.setGruntWorkingDir(self.util.getBnsPath()); // 为了截图修改的骨骼文件应该都在bns目录下
-                    for (const backupPath of self.backupList) {
-                        self.util.deleteFile(backupPath, false);
-                    }
-                    self.util.restoreGruntWorkingDir();
-                }
                 self.taskDone();
             }
         }
@@ -113,14 +108,6 @@ BstScreenShooter.prototype.processSingle = function(type, element) {
         return;
     }
 
-    // 确保skeleton文件存在
-    var skeletonPath = self.util.findUpkPath(element['skeleton'], function() {
-        self.finishSingle(name); // 即便文件不存在，也要将其标记为完成
-    });
-    if (skeletonPath === null) {
-        return; // 两个位置upk文件都不存在，只能跳过该项
-    }
-
     var outputPath = path.join(BstConst.PATH_DATABASE, type, 'pics', name + '.png');
     if (self.util.checkFileExists(outputPath, false)) {
         self.grunt.log.writeln('[BstScreenShooter] Skipping file, already exists: ' + name);
@@ -129,14 +116,33 @@ BstScreenShooter.prototype.processSingle = function(type, element) {
         return;
     }
 
-    var hasBackupToRestore = false; // 标识是否有文件需要恢复
-    var backupPath = null;
+    let workingPath = path.join(self.util.getWorkingPath(), nanoid());
+    self.util.mkdir(workingPath);
+
+    let fail = false;
+    let skeletonPath = self.util.copyResourceUpk(element['skeleton'], workingPath, () => fail = true);
+    self.util.copyResourceUpk(element['texture'], workingPath, () => fail = true);
+    self.util.copyResourceUpk(element['material'], workingPath, () => fail = true);
+    self.util.copyResourceUpk(element['col1Material'], workingPath, () => fail = true);
+
+    // scan upkId.log to copy all resources upk
+    if (!fail) {
+        let upkLog = self.util.readFileSplitWithLineBreak(path.join(BstConst.PATH_UPK_LOG, element['skeleton'] + '.log'));
+        for (const line of upkLog) {
+            let match = line.match(/(\d+).upk/);
+            if (match !== null) {
+                self.util.copyResourceUpk(match[1], workingPath, () => fail = true);
+            }
+        }
+    }
+
+    if (fail || skeletonPath === null) {
+        self.finishSingle(name, workingPath);
+        return;
+    }
 
     // 修改skeleton骨骼upk里的值，调整成非默认配色
     var handleUpk = function() {
-        hasBackupToRestore = true;
-        // 备份源文件
-        backupPath = self.util.backupFile(skeletonPath);
         self.util.readFileToBuffer(skeletonPath, function(data, path) {
             data = self.util.replaceAllBytes(data, element['col1Material'], element['material']);
             data = self.util.replaceAllBytes(data, 'col1', element['col']);
@@ -174,13 +180,13 @@ BstScreenShooter.prototype.processSingle = function(type, element) {
         });
         worker.on('exit', function (code) { self.util.logChildProcessExit('umodel', code); });
 
-        handleExport(worker.pid);
+        handleExport(worker);
     };
     
-    var handleExport = function(pid) {
+    var handleExport = function(umodel) {
         const timeout = 1000, width = 500, height = 600;
 
-        const cmd = `ExportTool ${pid} ${timeout} ${width} ${height} "${outputPath}"`;
+        const cmd = `ExportTool ${umodel.pid} ${timeout} ${width} ${height} "${outputPath}"`;
         self.grunt.log.writeln('[BstScreenShooter] Run: ' + cmd);
         var worker = cp.exec(
             cmd,
@@ -190,20 +196,9 @@ BstScreenShooter.prototype.processSingle = function(type, element) {
         worker.stderr.on('data', function (data) { self.util.logChildProcessStderr(data); });
         worker.on('exit', function (code) {
             self.util.logChildProcessExit('ExportTool', code);
-            handleBackup();
+            umodel.kill();
+            self.finishSingle(name, workingPath);
         });
-    };
-
-    // 恢复之前备份的文件，如果有的话
-    var handleBackup = function() {
-        if (hasBackupToRestore) {
-            // 恢复文件
-            self.util.restoreFile(backupPath);
-            // 存储需要删除的备份文件
-            self.backupList.push(backupPath);
-            self.grunt.log.writeln('[BstScreenShooter] Skeleton file restored: ' + skeletonPath);
-        }
-        self.finishSingle(name);
     };
 
     // 开始处理
@@ -214,7 +209,11 @@ BstScreenShooter.prototype.processSingle = function(type, element) {
     }
 };
 
-BstScreenShooter.prototype.finishSingle = function(name) {
+BstScreenShooter.prototype.finishSingle = function(name, workingPath) {
+    if (workingPath !== undefined) {
+        this.util.deleteDir(workingPath);
+    }
+
     this.statusWorkingChildProcess--;
     this.statusFinishedCount++;
 
