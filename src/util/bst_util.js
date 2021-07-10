@@ -17,7 +17,8 @@ var BstUtil = function(grunt) {
 
     this.conf = this.readJsonFile('./config/setting.json');
     this.tencentPath = path.join(this.conf['path']['game'], this.conf['path']['tencent']);
-    this.bnsPath = path.join(this.conf['path']['game'], this.conf['path']['bns']);
+    this.bnsPath = path.join(this.conf['path']['game'], this.conf['path']['bns']);    
+    this.working3DPath = path.join(this.gruntWorkingPath, 'working_3d');
 
     this.asyncList = []; // 异步工作控制器的注册列表
 
@@ -32,6 +33,10 @@ BstUtil.prototype.getBnsPath = function() {
 
 BstUtil.prototype.getTencentPath = function() {
     return this.tencentPath;
+};
+
+BstUtil.prototype.getWorkingPath = function() {
+    return this.working3DPath;
 };
 
 BstUtil.prototype.printHr = function() {
@@ -76,8 +81,12 @@ BstUtil.prototype.moveFile = function(fromPath, toPath, needFail) {
 
 BstUtil.prototype.deleteDir = function(path, needFail) {
     if (this.checkFileExists(path, needFail)) {
-        this.grunt.file.delete(path);
-        this.grunt.log.writeln('[BstUtil] Delete dir: ' + path);
+        try {
+            this.grunt.file.delete(path);
+            this.grunt.log.writeln('[BstUtil] Delete dir: ' + path);
+        } catch(error) {
+            this.grunt.log.error('[BstUtil] Delete err: ' + error);
+        }
     }
 };
 
@@ -277,6 +286,33 @@ BstUtil.prototype.restoreFile = function(backupPath) { // 这里的path是带后
         this.moveFile(backupPath, originPath);        
         this.grunt.log.writeln('[BstUtil] Original file restored: ' + originPath);
     }
+};
+
+BstUtil.prototype.clearWorkingDir = function() {
+    this.grunt.file.recurse(this.getWorkingPath(), function(abspath, rootdir, subdir, filename) {
+        if (filename !== 'working_3d_dir') {
+            this.util.deleteFile(abspath);
+        }
+    });
+};
+
+BstUtil.prototype.copyResourceUpk = function(upkId, dir, onErr) {
+    let output = path.join(dir, upkId + '.upk');
+
+    this.grunt.file.copy(
+        this.findUpkPath(upkId, function() {
+            output = null;
+
+            if (onErr && typeof onErr === 'function') {
+                onErr();
+            } else {
+                this.grunt.fail.fatal('[BstUpkViewer] Target upk not found ...');
+            }
+        }),
+        output
+    );
+
+    return output;
 };
 
 BstUtil.prototype.cancelAsyncEvent = function(eventName) {

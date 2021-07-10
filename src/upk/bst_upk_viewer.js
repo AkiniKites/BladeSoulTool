@@ -20,9 +20,6 @@ var BstUpkViewer = function(grunt, done) {
 
     this.conf = this.util.readJsonFile('./config/setting.json');
 
-    this.gruntWorkingPath = process.cwd();
-    this.working3DPath = path.join(this.gruntWorkingPath, 'working_3d');
-
     this.workingList = [];
 };
 
@@ -36,15 +33,8 @@ BstUpkViewer.prototype.start = function(partType, elementId) {
     self.util.partTypeCheck(partType);
 
     // clear working dir
-    self.grunt.log.writeln('[BstUpkViewer] Clean the tmp working dir: ' + self.working3DPath);
-    var clearWorkingDir = function() {
-        self.grunt.file.recurse(self.working3DPath, function(abspath, rootdir, subdir, filename) {
-            if (filename !== 'working_3d_dir') {
-                self.util.deleteFile(abspath);
-            }
-        });
-    };
-    clearWorkingDir();
+    self.grunt.log.writeln('[BstUpkViewer] Clean the tmp working dir: ' + self.util.getWorkingPath());
+    self.util.clearWorkingDir();
     self.util.printHr();
 
     // read conf
@@ -55,25 +45,19 @@ BstUpkViewer.prototype.start = function(partType, elementId) {
 
     // copy resources upk into working dir
     self.grunt.log.writeln('[BstUpkViewer] Prepare resource upk files ...');
-    var copyResourceUpk = function(upkId) {
-        self.util.copyFile(
-            self.util.findUpkPath(upkId, function() {
-                self.grunt.fail.fatal('[BstUpkViewer] Target upk not found ...');
-            }),
-            path.join(self.working3DPath, upkId + '.upk')
-        );
-    };
-    copyResourceUpk(element['skeleton']);
-    copyResourceUpk(element['texture']);
-    copyResourceUpk(element['material']);
-    copyResourceUpk(element['col1Material']);
+
+    let workingPath = self.util.getWorkingPath();
+    self.util.copyResourceUpk(element['skeleton'], workingPath);
+    self.util.copyResourceUpk(element['texture'], workingPath);
+    self.util.copyResourceUpk(element['material'], workingPath);
+    self.util.copyResourceUpk(element['col1Material'], workingPath);
 
     // scan upkId.log to copy all resources upk
     var upkLog = self.util.readFileSplitWithLineBreak(path.join(BstConst.PATH_UPK_LOG, element['skeleton'] + '.log'));
     for (const line of upkLog) {
         var match = line.match(/(\d+).upk/);
         if (match !== null) {
-            copyResourceUpk(match[1]);
+            self.util.copyResourceUpk(match[1], workingPath);
         }
     }
     self.util.printHr();
@@ -81,18 +65,18 @@ BstUpkViewer.prototype.start = function(partType, elementId) {
     var displayModel = function() {
         // 将upk文件使用umodel进行可视化
         var worker = cp.exec(
-            'umodel.exe -view -meshes -path="' + self.working3DPath + '" -game=bns ' + element['skeleton'],
+            'umodel.exe -view -meshes -path="' + self.util.getWorkingPath() + '" -game=bns ' + element['skeleton'],
             {"cwd": './resources/umodel/'}
         );
         worker.stdout.on('data', function (data) { self.util.logChildProcessStdout(data); });
         worker.stderr.on('data', function (data) { self.util.logChildProcessStderr(data); });
-        worker.on('exit', function (code) { clearWorkingDir(); self.taskDone(); });
+        worker.on('exit', function () { self.util.clearWorkingDir(); self.taskDone(); });
     };
 
     // edit the upk skeleton if col is not col1
     if (element['col'] !== 'col1') {
         self.grunt.log.writeln('[BstUpkViewer] Edit skeleton upk file to display not col1 materials ...');
-        self.util.readHexFile(path.join(self.working3DPath, element['skeleton'] + '.upk'), function(data, skeletonPath) {
+        self.util.readHexFile(path.join(self.util.getWorkingPath(), element['skeleton'] + '.upk'), function(data, skeletonPath) {
             // 将col1的配色upk名 替换成 非col1的配色upk名
             data = self.util.replaceStrAll(data, self.util.strUtf8ToHex(element['col1Material']), self.util.strUtf8ToHex(element['material']));
             // 将col1 替换成 非col1配色的colId
