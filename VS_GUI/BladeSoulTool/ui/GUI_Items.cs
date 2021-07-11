@@ -4,6 +4,7 @@ using System.Data;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using BladeSoulTool.lib;
 using Newtonsoft.Json.Linq;
@@ -12,7 +13,6 @@ namespace BladeSoulTool.ui
 {
     public partial class GuiItems : UserControl
     {
-
         private int _formType;
 
         private DataTable _dataTable;
@@ -23,24 +23,22 @@ namespace BladeSoulTool.ui
         private string _originElementId;
         private string _targetElementId;
 
-        private Thread _loadingThread;
-
         private JObject _originSettings;
 
-        private BstI18NLoader _i18N;
+        private I18NLoader _i18N;
+
+        private bool _loaded = false;
 
         public GuiItems(int formType)
         {
             InitializeComponent();
             InitI18N();
             Init(formType);
-
-            LoadItemList();
         }
 
         private void InitI18N()
         {
-            _i18N = BstI18NLoader.Instance;
+            _i18N = I18NLoader.Instance;
             labelRace.Text = _i18N.LoadI18NValue("GuiItems", "labelRace");
             btnView2DOrigin.Text = _i18N.LoadI18NValue("GuiItems", "btnView2D");
             btnView3DOrigin.Text = _i18N.LoadI18NValue("GuiItems", "btnView3D");
@@ -62,7 +60,7 @@ namespace BladeSoulTool.ui
         private void Init(int formType)
         {
             _formType = formType;
-            _originSettings = BstManager.ReadJsonFile(BstManager.GetItemOriginJsonPath(_formType));
+            _originSettings = Manager.ReadJsonFile(Manager.GetItemOriginJsonPath(_formType));
             // 数据列表
             _dataTable = new DataTable();
             // icon列
@@ -90,72 +88,60 @@ namespace BladeSoulTool.ui
             gridColumnIcon.Width = 64;
 
             this.gridItems.SelectionChanged += GridItemsOnSelectionChanged;
-            // 展示列表点击事件
-            //this.gridItems.CellClick += new DataGridViewCellEventHandler(this.gridItems_CellClick);
-            // 展示列表鼠标滚轴事件
-            //this.gridItems.MouseWheel += new MouseEventHandler(this.gridItems_MouseWheel);
 
             // 种族选择控件
             // ReSharper disable once CoVariantArrayConversion
-            comboBoxRace.Items.AddRange(BstManager.Instance.RaceNames.ToArray());
+            comboBoxRace.Items.AddRange(Manager.Instance.RaceNames.ToArray());
             comboBoxRace.SelectedIndex = 0;
-            comboBoxRace.SelectedIndexChanged += new EventHandler(comboBoxRace_SelectedIndexChanged);
+            comboBoxRace.SelectedIndexChanged += comboBoxRace_SelectedIndexChanged;
 
             // 查找模型控件
-            btnFilter.Click += new EventHandler(btnFilter_Click);
+            btnFilter.Click += btnFilter_Click;
 
             // 全部恢复按钮
-            btnTopRestoreAll.Click += new EventHandler(btnTopRestoreAll_Click);
+            btnTopRestoreAll.Click += btnTopRestoreAll_Click;
             // 预览原始模型2D截图
-            btnView2DOrigin.Click += new EventHandler(btnView2DOrigin_Click);
+            btnView2DOrigin.Click += btnView2DOrigin_Click;
             // 预览原始模型3D模型
-            btnView3DOrigin.Click += new EventHandler(btnView3DOrigin_Click);
+            btnView3DOrigin.Click += btnView3DOrigin_Click;
             // 预览目标模型2D截图
-            btnView2DTarget.Click += new EventHandler(btnView2DTarget_Click);
+            btnView2DTarget.Click += btnView2DTarget_Click;
             // 预览目标模型3D模型
-            btnView3DTarget.Click += new EventHandler(btnView3DTarget_Click);
+            btnView3DTarget.Click += btnView3DTarget_Click;
             // 替换按钮
-            btnReplace.Click += new EventHandler(btnReplace_Click);
+            btnReplace.Click += btnReplace_Click;
 
             // 展示选中物件的3D模型按钮
-            btnView3DInfo.Click += new EventHandler(btnView3DInfo_Click);
+            btnView3DInfo.Click += btnView3DInfo_Click;
             // 选为原始模型按钮
-            btnSelectOrigin.Click += new EventHandler(btnSelectOrigin_Click);
+            btnSelectOrigin.Click += btnSelectOrigin_Click;
             // 选为目标模型按钮
-            btnSelectTarget.Click += new EventHandler(btnSelectTarget_Click);
+            btnSelectTarget.Click += btnSelectTarget_Click;
         }
         
-        private void LoadItemList(int raceType = BstManager.RaceIdKunn)
+        public void Load()
         {
-            if (_loadingThread != null && _loadingThread.IsAlive)
-            {
-                // 之前启动的加载线程还活着，需要先停止
-                try
-                {
-                    _loadingThread.Abort();
-                }
-                catch (Exception ex)
-                {
-                    BstLogger.Instance.Log(ex.ToString());
-                }
-                _loadingThread = null;
-            }
+            if (_loaded) return;
+            
+            LoadItemList();
+        }
 
+        private void LoadItemList(int raceType = Manager.RaceIdKunn)
+        {
             ClearFormStatus(); // 清理旧的数据
 
-            // 启动新的线程来处理数据加载内容
-            _loadingThread = new Thread(() =>
+            Task.Run(() =>
             {
-                BstManager.ShowMsgInTextBox(textBoxOut, _i18N.LoadI18NValue("GuiItems", "logStartToLoadDataList"));
+                Manager.ShowMsgInTextBox(textBoxOut, _i18N.LoadI18NValue("GuiItems", "logStartToLoadDataList"));
 
                 //BstManager.HideDataGridViewVerticalScrollBar(this.gridItems); // 隐藏滚动条
 
                 // 更新原始模型区块数据
                 JObject originData = null;
-                if (_formType == BstManager.TypeAttach
-                    || _formType == BstManager.TypeCostume)
+                if (_formType == Manager.TypeAttach
+                    || _formType == Manager.TypeCostume)
                 {
-                    var race = BstManager.Instance.RaceTypes[raceType];
+                    var race = Manager.Instance.RaceTypes[raceType];
                     var data = (JObject) _originSettings[race];
                     if (data != null)
                     {
@@ -174,20 +160,20 @@ namespace BladeSoulTool.ui
                 if (originData != null)
                 {
                     LoadOriginAndTargetIconPic(pictureBoxOrigin, originData, true);
-                    BstManager.ShowMsgInTextBox(textBoxOrigin, originData.ToString(), false);
+                    Manager.ShowMsgInTextBox(textBoxOrigin, originData.ToString(), false);
                 }
 
                 // 初始化list数据
                 switch (_formType)
                 {
-                    case BstManager.TypeCostume:
-                        _data = BstManager.Instance.GetCostumeDataByRace(raceType);
+                    case Manager.TypeCostume:
+                        _data = Manager.Instance.GetCostumeDataByRace(raceType);
                         break;
-                    case BstManager.TypeAttach:
-                        _data = BstManager.Instance.GetAttachDataByRace(raceType);
+                    case Manager.TypeAttach:
+                        _data = Manager.Instance.GetAttachDataByRace(raceType);
                         break;
-                    case BstManager.TypeWeapon:
-                        _data = BstManager.Instance.DataWeapon;
+                    case Manager.TypeWeapon:
+                        _data = Manager.Instance.DataWeapon;
                         break;
                 }
                 // 加载list界面
@@ -198,17 +184,16 @@ namespace BladeSoulTool.ui
                     var elementData = (JObject) element.Value;
                     // 填充数据
                     // 这里暂时不考虑做成动态的gif动画，考虑到列表里的项可能比较多，那么多timer更新gif动态图可能造成性能问题
-                    _dataTable.Rows.Add(new object[] { BstManager.Instance.LoadingGifBytes, elementId }); 
+                    _dataTable.Rows.Add(new object[] { Manager.Instance.LoadingGifBytes, elementId }); 
                     var rowId = _dataTable.Rows.Count - 1;
-                    BstIconLoader.Instance.RegisterTask(new BstIconLoadTask(
+                    IconLoader.Instance.RegisterTask(new IconLoadTask(
                         elementData, gridItems, _dataTable, rowId, textBoxOut
                     ));
                 }
 
-                BstManager.ShowMsgInTextBox(textBoxOut, _i18N.LoadI18NValue("GuiItems", "logEndLoadDataList"));
-                BstIconLoader.Instance.Start(); // 启动图片加载器
+                Manager.ShowMsgInTextBox(textBoxOut, _i18N.LoadI18NValue("GuiItems", "logEndLoadDataList"));
+                IconLoader.Instance.Start(); // 启动图片加载器
             });
-            _loadingThread.Start();
         }
 
         private void ClearFormStatus()
@@ -231,7 +216,7 @@ namespace BladeSoulTool.ui
             _dataTable.Clear();
 
             // 清空之前的加载队列，准备重新填充加载内容
-            BstIconLoader.Instance.Stop();
+            IconLoader.Instance.Stop();
         }
         
         private void GridItemsOnSelectionChanged(object sender, EventArgs e)
@@ -244,42 +229,9 @@ namespace BladeSoulTool.ui
             var elementData = (JObject)_data[_selectedElementId];
             textBoxInfo.Text = elementData.ToString();
             // 模型截图控件
-            BstPicLoader.LoadPic(_formType, elementData, pictureBoxUmodel, textBoxOut);
+            PicLoader.LoadPic(_formType, elementData, pictureBoxUmodel, textBoxOut);
         }
-
-        private void gridItems_CellClick(object sender, DataGridViewCellEventArgs e)
-        {
-            if (e.RowIndex < 0 || e.RowIndex > (gridItems.RowCount - 1))
-            {
-                return; // 索引越界
-            }
-            // 数据展示列表的点击事件
-            gridItems.Rows[e.RowIndex].Selected = true;
-            gridItems.Refresh();
-            // 查找该行对应的数据
-            _selectedElementId = (string) gridItems.Rows[e.RowIndex].Cells[1].Value;
-            var elementData = (JObject) _data[_selectedElementId];
-            textBoxInfo.Text = elementData.ToString();
-            // 模型截图控件
-            BstPicLoader.LoadPic(_formType, elementData, pictureBoxUmodel, textBoxOut);
-        }
-
-        private void gridItems_MouseWheel(Object sender, MouseEventArgs e)
-        {
-            // 数据展示列表的鼠标滚轴事件
-            var currentIndex = gridItems.FirstDisplayedScrollingRowIndex;
-            var scrollLines = SystemInformation.MouseWheelScrollLines;
-
-            if (e.Delta > 0)
-            {
-                gridItems.FirstDisplayedScrollingRowIndex = Math.Max(0, currentIndex - scrollLines);
-            }
-            else if (e.Delta < 0)
-            {
-                gridItems.FirstDisplayedScrollingRowIndex = currentIndex + scrollLines;
-            }
-        }
-
+        
         private void comboBoxRace_SelectedIndexChanged(Object sender, EventArgs e)
         {
             // 重新选择种族，即重新加载界面
@@ -321,7 +273,7 @@ namespace BladeSoulTool.ui
                     _selectedElementId = elementId;
                     textBoxInfo.Text = elementData.ToString();
                     // 模型截图控件
-                    BstPicLoader.LoadPic(_formType, elementData, pictureBoxUmodel, textBoxOut);
+                    PicLoader.LoadPic(_formType, elementData, pictureBoxUmodel, textBoxOut);
                     // 更新列表展示位置
                     gridItems.FirstDisplayedScrollingRowIndex = i;
                     break;
@@ -332,11 +284,11 @@ namespace BladeSoulTool.ui
         private void btnTopRestoreAll_Click(Object sender, EventArgs e)
         {
             // 恢复全部模型
-            if (BstManager.DisplayConfirmMessageBox(
+            if (Manager.DisplayConfirmMessageBox(
                 _i18N.LoadI18NValue("GuiItems", "actionConfirmTitle"),
                 _i18N.LoadI18NValue("GuiItems", "actionRestoreMsg")) == DialogResult.OK)
             {
-                BstManager.Instance.RunGrunt(textBoxOut, true, "restore");
+                Manager.Instance.RunGrunt(textBoxOut, true, "restore");
             }
         }
 
@@ -345,7 +297,7 @@ namespace BladeSoulTool.ui
             // 预览原始模型2D截图
             if (_originElementId == null)
             {
-                BstManager.DisplayErrorMessageBox(
+                Manager.DisplayErrorMessageBox(
                     _i18N.LoadI18NValue("GuiItems", "actionSelectErrorTitle"),
                     _i18N.LoadI18NValue("GuiItems", "actionSelectOriginErrorMsg")
                 );
@@ -359,15 +311,15 @@ namespace BladeSoulTool.ui
             // 预览原始模型的3D模型
             if (_originElementId == null)
             {
-                BstManager.DisplayErrorMessageBox(
+                Manager.DisplayErrorMessageBox(
                     _i18N.LoadI18NValue("GuiItems", "actionSelectErrorTitle"),
                     _i18N.LoadI18NValue("GuiItems", "actionSelectOriginErrorMsg")
                 );
                 return;
             }
-            BstManager.Instance.RunGrunt(textBoxOut, false, "upk_viewer", new string[]
+            Manager.Instance.RunGrunt(textBoxOut, false, "upk_viewer", new string[]
             {
-                "--part=" + BstManager.GetTypeName(_formType),
+                "--part=" + Manager.GetTypeName(_formType),
                 "--model=" + _originElementId
             });
         }
@@ -377,7 +329,7 @@ namespace BladeSoulTool.ui
             // 预览目标模型2D截图
             if (_targetElementId == null)
             {
-                BstManager.DisplayErrorMessageBox(
+                Manager.DisplayErrorMessageBox(
                     _i18N.LoadI18NValue("GuiItems", "actionSelectErrorTitle"),
                     _i18N.LoadI18NValue("GuiItems", "actionSelectTargetErrorMsg")
                 );
@@ -391,15 +343,15 @@ namespace BladeSoulTool.ui
             // 预览目标模型的3D模型
             if (_targetElementId == null)
             {
-                BstManager.DisplayErrorMessageBox(
+                Manager.DisplayErrorMessageBox(
                     _i18N.LoadI18NValue("GuiItems", "actionSelectErrorTitle"),
                     _i18N.LoadI18NValue("GuiItems", "actionSelectTargetErrorMsg")
                 );
                 return;
             }
-            BstManager.Instance.RunGrunt(textBoxOut, false, "upk_viewer", new string[]
+            Manager.Instance.RunGrunt(textBoxOut, false, "upk_viewer", new string[]
             {
-                "--part=" + BstManager.GetTypeName(_formType),
+                "--part=" + Manager.GetTypeName(_formType),
                 "--model=" + _targetElementId
             });
         }
@@ -409,7 +361,7 @@ namespace BladeSoulTool.ui
             // 替换模型
             if (_originElementId == null)
             {
-                BstManager.DisplayErrorMessageBox(
+                Manager.DisplayErrorMessageBox(
                     _i18N.LoadI18NValue("GuiItems", "actionReplaceErrorTitle"),
                     _i18N.LoadI18NValue("GuiItems", "actionOriginEmptyErrorMsg")
                 );
@@ -417,7 +369,7 @@ namespace BladeSoulTool.ui
             }
             if (_targetElementId == null)
             {
-                BstManager.DisplayErrorMessageBox(
+                Manager.DisplayErrorMessageBox(
                     _i18N.LoadI18NValue("GuiItems", "actionReplaceErrorTitle"),
                     _i18N.LoadI18NValue("GuiItems", "actionTargetEmptyErrorMsg")
                 );
@@ -425,34 +377,34 @@ namespace BladeSoulTool.ui
             }
             if (_originElementId == _targetElementId)
             {
-                BstManager.DisplayErrorMessageBox(
+                Manager.DisplayErrorMessageBox(
                     _i18N.LoadI18NValue("GuiItems", "actionReplaceErrorTitle"),
                     _i18N.LoadI18NValue("GuiItems", "actionTargetSameErrorMsg")
                 );
                 return;
             }
-            if (_formType == BstManager.TypeWeapon) // 只有武器不可替换
+            if (_formType == Manager.TypeWeapon) // 只有武器不可替换
             {
                 // FIXME 后续制作功能，并开发这个限制
-                BstManager.DisplayErrorMessageBox(
+                Manager.DisplayErrorMessageBox(
                     _i18N.LoadI18NValue("GuiItems", "actionFuncNotDoneTitle"),
                     _i18N.LoadI18NValue("GuiItems", "actionWaitForFuncMsg")
                 );
                 return;
             }
-            if (BstManager.DisplayConfirmMessageBox(
+            if (Manager.DisplayConfirmMessageBox(
                 _i18N.LoadI18NValue("GuiItems", "actionConfirmTitle"),
                 _i18N.LoadI18NValue("GuiItems", "actionReplaceMsg")) == DialogResult.OK)
             {
                 string race = null;
-                if (_formType == BstManager.TypeAttach
-                    || _formType == BstManager.TypeCostume)
+                if (_formType == Manager.TypeAttach
+                    || _formType == Manager.TypeCostume)
                 {
-                    race = BstManager.Instance.RaceTypes[comboBoxRace.SelectedIndex];
+                    race = Manager.Instance.RaceTypes[comboBoxRace.SelectedIndex];
                 }
-                BstManager.Instance.RunGrunt(textBoxOut, false, "replace", new string[]
+                Manager.Instance.RunGrunt(textBoxOut, false, "replace", new string[]
                 {
-                    "--part=" + BstManager.GetTypeName(_formType),
+                    "--part=" + Manager.GetTypeName(_formType),
                     "--model=" + _targetElementId,
                     "--race=" + race
                 });
@@ -464,15 +416,15 @@ namespace BladeSoulTool.ui
             // 预览选中的对象的3D模型
             if (_selectedElementId == null)
             {
-                BstManager.DisplayErrorMessageBox(
+                Manager.DisplayErrorMessageBox(
                     _i18N.LoadI18NValue("GuiItems", "actionSelectErrorTitle"),
                     _i18N.LoadI18NValue("GuiItems", "actionSelectTargetErrorMsg")
                 );
                 return;
             }
-            BstManager.Instance.RunGrunt(textBoxOut, false, "upk_viewer", new string[]
+            Manager.Instance.RunGrunt(textBoxOut, false, "upk_viewer", new string[]
             {
-                "--part=" + BstManager.GetTypeName(_formType),
+                "--part=" + Manager.GetTypeName(_formType),
                 "--model=" + _selectedElementId
             });
         }
@@ -482,7 +434,7 @@ namespace BladeSoulTool.ui
             // 将当前选中的物件设为原始模型
             if (_selectedElementId == null)
             {
-                BstManager.DisplayErrorMessageBox(
+                Manager.DisplayErrorMessageBox(
                     _i18N.LoadI18NValue("GuiItems", "actionSelectErrorTitle"),
                     _i18N.LoadI18NValue("GuiItems", "actionSelectTargetErrorMsg")
                 );
@@ -498,13 +450,13 @@ namespace BladeSoulTool.ui
             var originData = new JObject();
             originData["id"] = _originElementId;
             originData["data"] = element;
-            if (_formType == BstManager.TypeAttach
-                || _formType == BstManager.TypeCostume)
+            if (_formType == Manager.TypeAttach
+                || _formType == Manager.TypeCostume)
             {
                 var originRace = (string) element["race"];
-                if (Regex.IsMatch(originRace, BstManager.Instance.RaceTypes[BstManager.RaceIdLyn], RegexOptions.IgnoreCase))
+                if (Regex.IsMatch(originRace, Manager.Instance.RaceTypes[Manager.RaceIdLyn], RegexOptions.IgnoreCase))
                 {
-                    originRace = BstManager.Instance.RaceTypes[BstManager.RaceIdLyn];
+                    originRace = Manager.Instance.RaceTypes[Manager.RaceIdLyn];
                 }
                 _originSettings[originRace] = originData;
             }
@@ -512,7 +464,7 @@ namespace BladeSoulTool.ui
             {
                 _originSettings = originData;
             }
-            BstManager.WriteJsonFile(BstManager.GetItemOriginJsonPath(_formType), _originSettings);
+            Manager.WriteJsonFile(Manager.GetItemOriginJsonPath(_formType), _originSettings);
         }
 
         private void btnSelectTarget_Click(Object sender, EventArgs e)
@@ -520,7 +472,7 @@ namespace BladeSoulTool.ui
             // 将当前选中的物件设为目标模型
             if (_selectedElementId == null)
             {
-                BstManager.DisplayErrorMessageBox(
+                Manager.DisplayErrorMessageBox(
                     _i18N.LoadI18NValue("GuiItems", "actionSelectErrorTitle"),
                     _i18N.LoadI18NValue("GuiItems", "actionSelectTargetErrorMsg")
                 );
@@ -543,37 +495,22 @@ namespace BladeSoulTool.ui
 
         private void LoadOriginAndTargetIconPic(PictureBox picture, JObject elementData, bool async = false)
         {
-            var cachePath = BstManager.GetIconPath(elementData);
+            var cachePath = Manager.GetIconPath(elementData);
             if(!File.Exists(cachePath))
             {
-                cachePath = BstManager.GetIconPath(elementData);
+                cachePath = Manager.GetIconPath(elementData);
             }
             if (async)
             {
-                MethodInvoker picUpdate = delegate
+                picture.TryBeginInvoke(() =>
                 {
-                    if (File.Exists(cachePath))
-                    {
-                        picture.ImageLocation = cachePath;
-                    }
-                    else
-                    {
-                        picture.ImageLocation = BstManager.PathErrorIcon;
-                    }
+                    picture.ImageLocation = File.Exists(cachePath) ? cachePath : Manager.PathErrorIcon;
                     picture.Load();
-                };
-                picture.BeginInvoke(picUpdate);
+                });
             }
             else
             {
-                if (File.Exists(cachePath))
-                {
-                    picture.ImageLocation = cachePath;
-                }
-                else
-                {
-                    picture.ImageLocation = BstManager.PathErrorIcon;
-                }
+                picture.ImageLocation = File.Exists(cachePath) ? cachePath : Manager.PathErrorIcon;
                 picture.Load();
             }
         }

@@ -3,17 +3,17 @@ using Newtonsoft.Json.Linq;
 
 namespace BladeSoulTool.lib
 {
-    class BstI18NLoader
+    class I18NLoader
     {
-        private static BstI18NLoader _instance;
+        private static I18NLoader _instance;
 
-        public static BstI18NLoader Instance 
+        public static I18NLoader Instance 
         {
             get 
             {
                 if (_instance == null)
                 {
-                    _instance = new BstI18NLoader();
+                    _instance = new I18NLoader();
                 }
                 return _instance;
             }
@@ -21,9 +21,9 @@ namespace BladeSoulTool.lib
 
         private JObject _i18n;
 
-        private BstI18NLoader()
+        private I18NLoader()
         {
-            _i18n = BstManager.Instance.DataI18N;
+            _i18n = Manager.Instance.DataI18N;
         }
 
         public string LoadI18NValue(string uiClassName, string key)
@@ -34,7 +34,7 @@ namespace BladeSoulTool.lib
             }
             catch (Exception ex)
             {
-                BstLogger.Instance.Log(ex.ToString());
+                Logger.Log(ex.ToString());
                 return null;
             }
         }

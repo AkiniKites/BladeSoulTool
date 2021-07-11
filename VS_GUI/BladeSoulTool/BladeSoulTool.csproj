@@ -64,13 +64,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="lib\BstI18NLoader.cs" />
-    <Compile Include="lib\BstLogger.cs" />
-    <Compile Include="lib\BstManager.cs" />
-    <Compile Include="lib\BstIconLoader.cs" />
-    <Compile Include="lib\BstIconLoadTask.cs" />
-    <Compile Include="lib\BstPicLoader.cs" />
-    <Compile Include="lib\BstGifImage.cs" />
+    <Compile Include="lib\Extensions.cs" />
+    <Compile Include="lib\I18NLoader.cs" />
+    <Compile Include="lib\Logger.cs" />
+    <Compile Include="lib\Manager.cs" />
+    <Compile Include="lib\IconLoader.cs" />
+    <Compile Include="lib\IconLoadTask.cs" />
+    <Compile Include="lib\PicLoader.cs" />
+    <Compile Include="lib\GifImage.cs" />
     <Compile Include="ui\GUI_Util.cs">
       <SubType>Form</SubType>
     </Compile>

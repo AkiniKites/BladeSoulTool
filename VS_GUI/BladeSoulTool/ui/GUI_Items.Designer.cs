@@ -347,7 +347,6 @@
             // GuiItems
             // 
             this.AutoSize = true;
-            this.ClientSize = new System.Drawing.Size(1177, 804);
             this.Controls.Add(this.labelRestore);
             this.Controls.Add(this.btnFilter);
             this.Controls.Add(this.labelFilter);
@@ -363,7 +362,7 @@
             this.Controls.Add(this.gridItems);
             this.Controls.Add(this.pictureBoxUmodel);
             this.Name = "GuiItems";
-            this.Text = "GUI_Items";
+            this.Size = new System.Drawing.Size(1177, 804);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxUmodel)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridItems)).EndInit();
             this.panelTarget.ResumeLayout(false);

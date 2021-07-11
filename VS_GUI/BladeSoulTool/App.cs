@@ -25,19 +25,17 @@ namespace BladeSoulTool
             }
         }
 
-        private Control _costumes;
-        private Control _formAttach;
-        private Control _formWeapon;
+        private GuiItems[] _items = new GuiItems[3];
         private Control _formUtil;
 
-        private BstI18NLoader _i18N;
+        private I18NLoader _i18N;
 
         private App()
         {
             InitializeComponent();
-            
-            BstManager.CreateInstance();
-            BstIconLoader.CreateInstance();
+
+            Manager.CreateInstance();
+            IconLoader.CreateInstance();
 
             CheckBnsGamePath();
 
@@ -47,7 +45,7 @@ namespace BladeSoulTool
 
         private void InitI18N()
         {
-            _i18N = BstI18NLoader.Instance;
+            _i18N = I18NLoader.Instance;
             tabCostume.Text = _i18N.LoadI18NValue("App", "tabCostume");
             tabAttach.Text = _i18N.LoadI18NValue("App", "tabAttach");
             tabWeapon.Text = _i18N.LoadI18NValue("App", "tabWeapon");
@@ -57,27 +55,25 @@ namespace BladeSoulTool
 
         private void Init()
         {
-            BstLogger.Instance.Log("[App] BladeSoulTool App start ...");
+            Logger.Log("[App] BladeSoulTool App start ...");
 
-            _costumes = new GuiItems(BstManager.TypeCostume);
-            tabCostume.Controls.Add(_costumes);
-
-            tabControl.SelectedIndexChanged += new EventHandler(tabControl_SelectedIndexChanged);
+            tabControl.SelectedIndexChanged += tabControl_SelectedIndexChanged;
+            tabControl_SelectedIndexChanged(null, null);
         }
 
         private void CheckBnsGamePath()
         {
             Task.Run(() =>
             {
-                var gamePath = (string) BstManager.Instance.SystemSettings["path"]["game"];
+                var gamePath = (string)Manager.Instance.SystemSettings["path"]["game"];
                 if (!Directory.Exists(gamePath) || !File.Exists(gamePath + "/bin/Client.exe"))
                 {
                     // 游戏地址配置不存在或不正确，更新为null
-                    BstManager.Instance.SystemSettings["path"]["game"] = null;
-                    BstManager.WriteJsonFile(BstManager.PathJsonSettings, BstManager.Instance.SystemSettings);
-                    BstManager.DisplayErrorMessageBox(
-                        BstI18NLoader.Instance.LoadI18NValue("App", "gamePathErrTitle"),
-                        BstI18NLoader.Instance.LoadI18NValue("App", "gamePathErrContent")
+                    Manager.Instance.SystemSettings["path"]["game"] = null;
+                    Manager.WriteJsonFile(Manager.PathJsonSettings, Manager.Instance.SystemSettings);
+                    Manager.DisplayErrorMessageBox(
+                        I18NLoader.Instance.LoadI18NValue("App", "gamePathErrTitle"),
+                        I18NLoader.Instance.LoadI18NValue("App", "gamePathErrContent")
                     );
                 }
             });
@@ -85,24 +81,24 @@ namespace BladeSoulTool
 
         private void CheckNewVersion()
         {
-            var currentVer = (string) BstManager.Instance.SystemSettings["version"];
+            var currentVer = (string)Manager.Instance.SystemSettings["version"];
             Task.Run(() =>
             {
-                var releasedVer = BstManager.GetStringFromWeb(BstManager.GithubVersionTxt);
+                var releasedVer = Manager.GetStringFromWeb(Manager.GithubVersionTxt);
                 // releasedVer是从网络下载的，在网络无法访问或下载失败的情况下，可能为null，需要做验证
                 if (!String.IsNullOrEmpty(releasedVer) && currentVer != releasedVer)
                 {
-                    var result = BstManager.DisplayConfirmMessageBox(
+                    var result = Manager.DisplayConfirmMessageBox(
                         _i18N.LoadI18NValue("App", "newVerTitle"),
                         string.Format(
                             _i18N.LoadI18NValue("App", "newVerContent"),
                             currentVer,
                             releasedVer,
-                            BstI18NLoader.Instance.LoadI18NValue("App", "releaseSiteUrl"))
+                            I18NLoader.Instance.LoadI18NValue("App", "releaseSiteUrl"))
                     );
                     if (result == DialogResult.OK)
                     {
-                        Process.Start(BstI18NLoader.Instance.LoadI18NValue("App", "releaseSiteUrl"));
+                        Process.Start(I18NLoader.Instance.LoadI18NValue("App", "releaseSiteUrl"));
                     }
                 }
             });
@@ -110,42 +106,35 @@ namespace BladeSoulTool
 
         private void tabControl_SelectedIndexChanged(Object sender, EventArgs e)
         {
-            BstLogger.Instance.Log("[App] Switch to tab: " + tabControl.SelectedIndex);
-            switch (tabControl.SelectedIndex)
+            Logger.Log("[App] Switch to tab: " + tabControl.SelectedIndex);
+
+            var idx = tabControl.SelectedIndex;
+            if (idx < 3)
             {
-                case BstManager.TypeCostume:
-                    if (_costumes == null) 
+                if (_items[idx] == null)
+                {
+                    _items[idx] = new GuiItems(idx);
+                    
+                    switch(idx)
                     {
-                        _costumes = new GuiItems(BstManager.TypeCostume);
-                        tabCostume.Controls.Add(_costumes);
-                    }
-                    break;
-                case BstManager.TypeAttach:
-                    if (_formAttach == null)
-                    {
-                        _formAttach = new GuiItems(BstManager.TypeAttach);
-                        tabAttach.Controls.Add(_formAttach);
-                    }
-                    break;
-                case BstManager.TypeWeapon:
-                    if (_formWeapon == null)
-                    {
-                        _formWeapon = new GuiItems(BstManager.TypeWeapon);
-                        tabWeapon.Controls.Add(_formWeapon);
-                    }
-                    break;
-                case BstManager.TypeUtil:
-                    if (_formUtil == null)
-                    {
-                        _formUtil = CreateUtilForm();
-                        tabUtil.Controls.Add(_formUtil);
-                    }
-                    break;
-                default:
-                    break;
+                        case Manager.TypeCostume: tabCostume.Controls.Add(_items[idx]); break;
+                        case Manager.TypeAttach: tabAttach.Controls.Add(_items[idx]); break;
+                        case Manager.TypeWeapon: tabWeapon.Controls.Add(_items[idx]); break;
+                    };
+
+                    _items[idx].Load();
+                }
+            }
+            else
+            {
+                if (_formUtil == null)
+                {
+                    _formUtil = CreateUtilForm();
+                    tabUtil.Controls.Add(_formUtil);
+                }
             }
         }
-        
+
         private static Form CreateUtilForm()
         {
             return CreateFormAttr(new GuiUtil());
