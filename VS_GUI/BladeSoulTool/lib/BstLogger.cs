@@ -28,7 +28,7 @@ namespace BladeSoulTool.lib
             var logPath = BstManager.PathVsRoot + BstManager.PathVsLog + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-ffff") + ".log";
             BstManager.CreateFile(logPath);
             var timer = new Timer(5000);
-            this._buff = new StringBuilder();
+            _buff = new StringBuilder();
             timer.Elapsed += (sender, args) => File.AppendAllText(logPath, _buff.ToString());
             timer.AutoReset = true;
             timer.Enabled = true;
@@ -37,7 +37,7 @@ namespace BladeSoulTool.lib
         public void Log(string msg)
         {
             //Console.WriteLine(msg);
-            this._buff.AppendLine(DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-ffff") + " " + msg);
+            _buff.AppendLine(DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-ffff") + " " + msg);
         }
     }
 }

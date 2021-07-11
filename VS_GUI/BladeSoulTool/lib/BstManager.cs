@@ -27,10 +27,17 @@ namespace BladeSoulTool.lib
                 return _instance;
             }
         }
+        public static void CreateInstance()
+        {
+            if (_instance == null)
+            {
+                _instance = new BstManager();
+            }
+        }
 
         private BstManager()
         {
-            this.Init();
+            Init();
         }
 
         public const int RaceIdKunn = 0;
@@ -57,24 +64,24 @@ namespace BladeSoulTool.lib
         public const string PathVsConfig = "config/";
         public const string PathVsLocales = "locale/";
 
-        public const string PathJsonSettings = BstManager.PathRoot + BstManager.PathConfig + "setting.json";
-        public const string PathI18N = BstManager.PathVsRoot + BstManager.PathVsLocales;
+        public const string PathJsonSettings = PathRoot + PathConfig + "setting.json";
+        public const string PathI18N = PathVsRoot + PathVsLocales;
 
-        public const string PathDataCostume = BstManager.PathRoot + BstManager.PathDatabase + "costume/data/";
-        public const string PathDataAttach = BstManager.PathRoot + BstManager.PathDatabase + "attach/data/";
-        public const string PathDataWeapon = BstManager.PathRoot + BstManager.PathDatabase + "weapon/data/";
+        public const string PathDataCostume = PathRoot + PathDatabase + "costume/data/";
+        public const string PathDataAttach = PathRoot + PathDatabase + "attach/data/";
+        public const string PathDataWeapon = PathRoot + PathDatabase + "weapon/data/";
 
         public const string FileJsonData = "data.json";
         public const string FileJsonDataInvalid = "data_invalid.json";
         public const string FileJsonOrigin = "origin.json";
 
-        public const string PathLoadingGif = BstManager.PathRoot + BstManager.PathResources + "others/loading.gif";
-        public const string PathNoIcon = BstManager.PathRoot + BstManager.PathResources + "others/no_icon_64x64.png";
-        public const string PathErrorIcon = BstManager.PathRoot + BstManager.PathResources + "others/error_icon_64x64.png";
+        public const string PathLoadingGif = PathRoot + PathResources + "others/loading.gif";
+        public const string PathNoIcon = PathRoot + PathResources + "others/no_icon_64x64.png";
+        public const string PathErrorIcon = PathRoot + PathResources + "others/error_icon_64x64.png";
 
         public const string GithubRoot = "https://raw.githubusercontent.com/daniels1989/BladeSoulTool/";
         public const string GithubBranch = "master";
-        public const string GithubVersionTxt = BstManager.GithubRoot + BstManager.GithubBranch + "/VERSION.txt";        
+        public const string GithubVersionTxt = GithubRoot + GithubBranch + "/VERSION.txt";        
         
         public const string GruntRunSign = "Grunt and task output will also be logged to";
         public const string BstReportMissingInfo = "-1";
@@ -104,42 +111,42 @@ namespace BladeSoulTool.lib
 
         private void Init()
         {
-            this.SystemSettings = BstManager.ReadJsonFile(BstManager.PathJsonSettings);
-            this.DataCostume = BstManager.ReadJsonFile(BstManager.PathDataCostume + BstManager.FileJsonData);
-            this.DataCostumeInvalid = BstManager.ReadJsonFile(BstManager.PathDataCostume + BstManager.FileJsonDataInvalid);
-            this.DataAttach = BstManager.ReadJsonFile(BstManager.PathDataAttach + BstManager.FileJsonData);
-            this.DataAttachInvalid = BstManager.ReadJsonFile(BstManager.PathDataAttach + BstManager.FileJsonDataInvalid);
-            this.DataWeapon = BstManager.ReadJsonFile(BstManager.PathDataWeapon + BstManager.FileJsonData);
-            this.DataWeaponInvalid = BstManager.ReadJsonFile(BstManager.PathDataWeapon + BstManager.FileJsonDataInvalid);
+            SystemSettings = ReadJsonFile(PathJsonSettings);
+            DataCostume = ReadJsonFile(PathDataCostume + FileJsonData);
+            DataCostumeInvalid = ReadJsonFile(PathDataCostume + FileJsonDataInvalid);
+            DataAttach = ReadJsonFile(PathDataAttach + FileJsonData);
+            DataAttachInvalid = ReadJsonFile(PathDataAttach + FileJsonDataInvalid);
+            DataWeapon = ReadJsonFile(PathDataWeapon + FileJsonData);
+            DataWeaponInvalid = ReadJsonFile(PathDataWeapon + FileJsonDataInvalid);
 
-            var lang = (string) this.SystemSettings["lang"];
-            this.DataI18N = BstManager.ReadJsonFile(BstManager.PathI18N + lang + ".json");
+            var lang = (string) SystemSettings["lang"];
+            DataI18N = ReadJsonFile(PathI18N + lang + ".json");
 
-            var raceNamesInConfig = (JArray) this.DataI18N["Game"]["raceNames"];
-            this.RaceNames = new List<string>();
-            this.RaceNames.AddRange(
+            var raceNamesInConfig = (JArray) DataI18N["Game"]["raceNames"];
+            RaceNames = new List<string>();
+            RaceNames.AddRange(
                 raceNamesInConfig.ToObject<List<string>>()
             );
-            this.RaceTypes = new List<string>();
-            this.RaceTypes.AddRange(new string[] 
+            RaceTypes = new List<string>();
+            RaceTypes.AddRange(new string[] 
             {
                 "KunN", "JinF", "JinM", "GonF", "GonM", "Lyn"
             });
 
-            this.LanguageNames = new List<string>();
-            this.LanguageNames.AddRange(new String[]
+            LanguageNames = new List<string>();
+            LanguageNames.AddRange(new String[]
             {
                 "English", "简体中文"
             });
-            this.LanguageTypes = new List<string>();
-            this.LanguageTypes.AddRange(new String[]
+            LanguageTypes = new List<string>();
+            LanguageTypes.AddRange(new String[]
             {
                 "en_US", "zh_CN" 
             });
 
-            this.LoadingGifBytes = BstManager.GetBytesFromFile(BstManager.PathLoadingGif);
-            this.NoIconBytes = BstManager.GetBytesFromFile(BstManager.PathNoIcon);
-            this.ErrorIconBytes = BstManager.GetBytesFromFile(BstManager.PathErrorIcon);
+            LoadingGifBytes = GetBytesFromFile(PathLoadingGif);
+            NoIconBytes = GetBytesFromFile(PathNoIcon);
+            ErrorIconBytes = GetBytesFromFile(PathErrorIcon);
         }
 
         public static JObject ReadJsonFile(string path)
@@ -159,14 +166,14 @@ namespace BladeSoulTool.lib
             JObject data = null;
             switch (type)
             {
-                case BstManager.TypeAttach:
-                    data = this.DataAttach;
+                case TypeAttach:
+                    data = DataAttach;
                     break;
-                case BstManager.TypeCostume:
-                    data = this.DataCostume;
+                case TypeCostume:
+                    data = DataCostume;
                     break;
-                case BstManager.TypeWeapon:
-                    data = this.DataWeapon;
+                case TypeWeapon:
+                    data = DataWeapon;
                     break;
             }
             return data;
@@ -176,11 +183,11 @@ namespace BladeSoulTool.lib
         {
             BstLogger.Instance.Log("[BstManager] GetCostumeDataByRace: " + raceId);
 
-            var raceType = this.RaceTypes[raceId]; // 获取目标种族类型名
+            var raceType = RaceTypes[raceId]; // 获取目标种族类型名
 
             var filtered = new JObject();
 
-            foreach (var element in this.DataCostume.Properties())
+            foreach (var element in DataCostume.Properties())
             {
                 var elementId = element.Name;
                 var elementData = (JObject) element.Value;
@@ -199,11 +206,11 @@ namespace BladeSoulTool.lib
         {
             BstLogger.Instance.Log("[BstManager] GetAttachDataByRace: " + raceId);
 
-            var raceType = this.RaceTypes[raceId]; // 获取目标种族类型名
+            var raceType = RaceTypes[raceId]; // 获取目标种族类型名
 
             var filtered = new JObject();
 
-            foreach (var element in this.DataAttach.Properties())
+            foreach (var element in DataAttach.Properties())
             {
                 var elementId = element.Name;
                 var elementData = (JObject) element.Value;
@@ -222,7 +229,7 @@ namespace BladeSoulTool.lib
         {
             if (!File.Exists(path))
             {
-                BstManager.CreateFile(path);
+                CreateFile(path);
             }
             try
             {
@@ -418,13 +425,13 @@ namespace BladeSoulTool.lib
             var name = "attach";
             switch (type)
             {
-                case BstManager.TypeAttach:
+                case TypeAttach:
                     name = "attach";
                     break;
-                case BstManager.TypeCostume:
+                case TypeCostume:
                     name = "costume";
                     break;
-                case BstManager.TypeWeapon:
+                case TypeWeapon:
                     name = "weapon";
                     break;
                 default:
@@ -441,14 +448,14 @@ namespace BladeSoulTool.lib
 
             if (!string.IsNullOrEmpty(iconPicName))
             {
-                path = BstManager.PathRoot + 
-                    (string) BstManager.Instance.SystemSettings["png_optimizer"]["tasks"]["icon"]["src"]
+                path = PathRoot + 
+                    (string) Instance.SystemSettings["png_optimizer"]["tasks"]["icon"]["src"]
                     + "/" + iconPicName;
             }
             else
             {
                 // The picture is set to empty, indicating that the item does not have an icon, directly to the default icon path
-                path = BstManager.PathNoIcon;
+                path = PathNoIcon;
             }
 
             return path;
@@ -456,14 +463,14 @@ namespace BladeSoulTool.lib
 
         public static string GetItemPicPath(int type, JObject elementData)
         {
-            return BstManager.PathRoot + 
-                (string)BstManager.Instance.SystemSettings["png_optimizer"]["tasks"][BstManager.GetTypeName(type)]["src"]
+            return PathRoot + 
+                (string)Instance.SystemSettings["png_optimizer"]["tasks"][GetTypeName(type)]["src"]
                 + "/" + (string) elementData["core"] + "_" + (string) elementData["col"] + ".png";
         }
 
         public static string GetItemOriginJsonPath(int type)
         {
-            return BstManager.PathRoot + BstManager.PathDatabase + BstManager.GetTypeName(type) + "/data/origin.json";
+            return PathRoot + PathDatabase + GetTypeName(type) + "/data/origin.json";
         }
 
         public static void ShowMsgInTextBox(TextBox box, string msg, bool logInConsole = true)
@@ -492,14 +499,14 @@ namespace BladeSoulTool.lib
 
         public void RunGrunt(TextBox box, bool showMessage, string task = "", string[] args = null)
         {
-            if (this._isGruntRunning)
+            if (_isGruntRunning)
             {
                 BstLogger.Instance.Log(BstI18NLoader.Instance.LoadI18NValue("BstManager", "gruntAlreadyRun"));
                 return; // 已经有grunt脚本在运行了，这里不再运行新的脚本
             }
             else
             {
-                this._isGruntRunning = true;
+                _isGruntRunning = true;
             }
 
             var worker = new BackgroundWorker();
@@ -507,12 +514,12 @@ namespace BladeSoulTool.lib
             {
                 var proc = new Process();
 
-                var cwd = Directory.GetCurrentDirectory() + "/" + BstManager.PathRoot;
+                var cwd = Directory.GetCurrentDirectory() + "/" + PathRoot;
                 const string cmd = "cmd.exe";
                 var arguments = "/c grunt " + task + " " + ((args == null) ? "" : String.Join(" ", args)) + " --no-color --stack";
                 // 打印命令信息
                 var logMsg = string.Format(BstI18NLoader.Instance.LoadI18NValue("BstManager", "gruntStartLog"), cwd, cmd, arguments);
-                BstManager.ShowMsgInTextBox(box, logMsg);
+                ShowMsgInTextBox(box, logMsg);
 
                 proc.StartInfo.WorkingDirectory = cwd;
                 proc.StartInfo.FileName = cmd;
@@ -525,19 +532,19 @@ namespace BladeSoulTool.lib
                 proc.EnableRaisingEvents = true;
                 if (showMessage)
                 {
-                    proc.Exited += (es, ee) => BstManager.DisplayInfoMessageBox(
+                    proc.Exited += (es, ee) => DisplayInfoMessageBox(
                         BstI18NLoader.Instance.LoadI18NValue("BstManager", "gruntResultTitle"),
                         BstI18NLoader.Instance.LoadI18NValue("BstManager", "gruntResultMsg")
                     );
                 }
 
-                proc.OutputDataReceived += (dataSender, dataE) => BstManager.ShowMsgInTextBox(box, dataE.Data); // 注册输出接收事件
+                proc.OutputDataReceived += (dataSender, dataE) => ShowMsgInTextBox(box, dataE.Data); // 注册输出接收事件
                 proc.Start(); // 启动
                 proc.BeginOutputReadLine(); // 逐行读入输出
             };
             worker.RunWorkerCompleted += (s, e) =>
             {
-                this._isGruntRunning = false;
+                _isGruntRunning = false;
                 worker.Dispose();
             };
             worker.RunWorkerAsync();

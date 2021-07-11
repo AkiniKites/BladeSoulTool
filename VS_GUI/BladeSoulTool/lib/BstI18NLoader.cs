@@ -23,14 +23,14 @@ namespace BladeSoulTool.lib
 
         private BstI18NLoader()
         {
-            this._i18n = BstManager.Instance.DataI18N;
+            _i18n = BstManager.Instance.DataI18N;
         }
 
         public string LoadI18NValue(string uiClassName, string key)
         {
             try
             {
-                return (string) this._i18n[uiClassName][key];
+                return (string) _i18n[uiClassName][key];
             }
             catch (Exception ex)
             {

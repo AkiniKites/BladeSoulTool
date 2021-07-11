@@ -17,7 +17,7 @@ namespace BladeSoulTool.lib
             var data = BstManager.Instance.GetAllDataByType(type);
             var elementData = (JObject) data[elementId];
 
-            BstPicLoader.LoadPic(type, elementData, picture, box);
+            LoadPic(type, elementData, picture, box);
         }
 
         public static void LoadPic(int type, JObject elementData, PictureBox picture, TextBox box = null)
@@ -25,7 +25,7 @@ namespace BladeSoulTool.lib
             //var url = BstManager.GetItemPicUrl(type, elementData);
             //var path = BstManager.GetItemPicTmpPath(type, elementData);
 
-            BstPicLoader.RunLoading(type, elementData, picture, box);
+            RunLoading(type, elementData, picture, box);
         }
 
         private static void RunLoading(int type, JObject elementData, PictureBox picture, TextBox box = null)
@@ -33,7 +33,7 @@ namespace BladeSoulTool.lib
             new Thread(() =>
             {
                 Timer loadingTimer = null;
-                if (!BstPicLoader.LoadingTimers.ContainsKey(picture))
+                if (!LoadingTimers.ContainsKey(picture))
                 {
                     // Update the image into the read state. 
                     // If the Timer of the PictureBox already exists in the Dictionary, the loading map is already loaded.
@@ -55,21 +55,21 @@ namespace BladeSoulTool.lib
                             // Because we may display the loading dynamic graph in the PictureBox in the GUI of the GUI_Picture.
                             // The above window may be destroyed after being closed.Here we need to handle the error after the window is destroyed.
                             // At this time, Timer should be registered in the Dictionary.
-                            if (BstPicLoader.LoadingTimers.ContainsKey(picture))
+                            if (LoadingTimers.ContainsKey(picture))
                             {
-                                var timer = BstPicLoader.LoadingTimers[picture];
+                                var timer = LoadingTimers[picture];
                                 timer.Enabled = false;
-                                BstPicLoader.LoadingTimers.Remove(picture);
+                                LoadingTimers.Remove(picture);
                                 timer.Dispose();
                             }
                         }
                     };
-                    BstPicLoader.LoadingTimers.Add(picture, loadingTimer);
+                    LoadingTimers.Add(picture, loadingTimer);
                     loadingTimer.Enabled = true;
                 }
                 else
                 {
-                    loadingTimer = BstPicLoader.LoadingTimers[picture];
+                    loadingTimer = LoadingTimers[picture];
                 }
 
                 byte[] blob = null;
@@ -99,7 +99,7 @@ namespace BladeSoulTool.lib
                 }
 
                 loadingTimer.Enabled = false;
-                BstPicLoader.LoadingTimers.Remove(picture);
+                LoadingTimers.Remove(picture);
                 loadingTimer.Dispose();
 
                 var bitmap = BstManager.ConvertByteToImage(blob);

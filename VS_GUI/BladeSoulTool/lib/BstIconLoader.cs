@@ -21,6 +21,13 @@ namespace BladeSoulTool.lib
                 return _instance;
             }
         }
+        public static void CreateInstance()
+        {
+            if (_instance == null)
+            {
+                _instance = new BstIconLoader();
+            }
+        }
 
         // After downloading|reading how many icon images are read, refresh the UI. 
         // If the frequency is too fast, the refresh will kill the main interface.
@@ -31,7 +38,7 @@ namespace BladeSoulTool.lib
 
         private BstIconLoader()
         {
-            this._queue = new Queue<BstIconLoadTask>();
+            _queue = new Queue<BstIconLoadTask>();
         }
 
         public void Run()
@@ -40,7 +47,7 @@ namespace BladeSoulTool.lib
             var isAnyTaskLeft = true;
             while (isAnyTaskLeft)
             {
-                var task = this._queue.Dequeue();
+                var task = _queue.Dequeue();
 
                 // Loading image
                 byte[] pic = null;
@@ -72,7 +79,7 @@ namespace BladeSoulTool.lib
 
                 // Check the icon loading progress and refresh ui
                 updatedCount++;
-                if (updatedCount >= BstIconLoader.UpdateThrottle)
+                if (updatedCount >= UpdateThrottle)
                 {
                     MethodInvoker tableUpdateAction = () => task.Grid.Refresh();
                     try
@@ -87,7 +94,7 @@ namespace BladeSoulTool.lib
                 }
 
                 // Still have work still not completed, continue to poll
-                if (this._queue.Count != 0) continue;
+                if (_queue.Count != 0) continue;
 
                 // The current work queue has been emptied, the UI is finally updated, and the shutdown status is set.
                 MethodInvoker tableFinalUpdateAction = () => task.Grid.Refresh();
@@ -101,30 +108,30 @@ namespace BladeSoulTool.lib
 
         public void RegisterTask(BstIconLoadTask task)
         {
-            this._queue.Enqueue(task);
+            _queue.Enqueue(task);
         }
 
         public void Start()
         {
-            this._iconLoaderThread = new Thread(this.Run) { IsBackground = true };
-            this._iconLoaderThread.Start();
+            _iconLoaderThread = new Thread(Run) { IsBackground = true };
+            _iconLoaderThread.Start();
         }
 
         public void Stop()
         {
-            this._queue.Clear();
-            if (this._iconLoaderThread != null && this._iconLoaderThread.IsAlive)
+            _queue.Clear();
+            if (_iconLoaderThread != null && _iconLoaderThread.IsAlive)
             {
                 try
                 {
-                    this._iconLoaderThread.Abort(); // Force exit if the thread is working
+                    _iconLoaderThread.Abort(); // Force exit if the thread is working
                 }
                 catch (Exception ex)
                 {
                     BstLogger.Instance.Log(ex.ToString());
                 }
             }
-            this._iconLoaderThread = null;
+            _iconLoaderThread = null;
         }
     }
 }

@@ -15,12 +15,12 @@ namespace BladeSoulTool.lib
 
         public BstIconLoadTask(JObject elementData, DataGridView grid, DataTable table, int rowId = 0, TextBox box = null, int colId = 0)
         {
-            this.ElementData = elementData;
-            this.Grid = grid;
-            this.Table = table;
-            this.RowId = rowId;
-            this.Box = box;
-            this.ColId = colId;
+            ElementData = elementData;
+            Grid = grid;
+            Table = table;
+            RowId = rowId;
+            Box = box;
+            ColId = colId;
         }
     }
 }

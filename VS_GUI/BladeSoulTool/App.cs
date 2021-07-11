@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using BladeSoulTool.lib;
 using BladeSoulTool.ui;
@@ -24,53 +25,49 @@ namespace BladeSoulTool
             }
         }
 
-        private Form _formCostume;
-        private Form _formAttach;
-        private Form _formWeapon;
-        private Form _formUtil;
+        private Control _costumes;
+        private Control _formAttach;
+        private Control _formWeapon;
+        private Control _formUtil;
 
         private BstI18NLoader _i18N;
 
         private App()
         {
             InitializeComponent();
+            
+            BstManager.CreateInstance();
+            BstIconLoader.CreateInstance();
 
-            // 初始化数据
-            var dataManager = BstManager.Instance;
-            // 初始化icon图片加载器
-            var loader = BstIconLoader.Instance;
-            // 检查新版本
-            //this.CheckNewVersion();
-            // 检查游戏安装路径设置
-            this.CheckBnsGamePath();
+            CheckBnsGamePath();
 
-            this.InitI18N();
-            this.Init();
+            InitI18N();
+            Init();
         }
 
         private void InitI18N()
         {
-            this._i18N = BstI18NLoader.Instance;
-            this.tabCostume.Text = this._i18N.LoadI18NValue("App", "tabCostume");
-            this.tabAttach.Text = this._i18N.LoadI18NValue("App", "tabAttach");
-            this.tabWeapon.Text = this._i18N.LoadI18NValue("App", "tabWeapon");
-            this.tabUtil.Text = this._i18N.LoadI18NValue("App", "tabUtil");
-            this.Text = this._i18N.LoadI18NValue("App", "title");
+            _i18N = BstI18NLoader.Instance;
+            tabCostume.Text = _i18N.LoadI18NValue("App", "tabCostume");
+            tabAttach.Text = _i18N.LoadI18NValue("App", "tabAttach");
+            tabWeapon.Text = _i18N.LoadI18NValue("App", "tabWeapon");
+            tabUtil.Text = _i18N.LoadI18NValue("App", "tabUtil");
+            Text = _i18N.LoadI18NValue("App", "title");
         }
 
         private void Init()
         {
             BstLogger.Instance.Log("[App] BladeSoulTool App start ...");
-            // 初始化第一个tab，costume
-            this._formCostume = CreateItemsForm(BstManager.TypeCostume);
-            this.tabCostume.Controls.Add(this._formCostume);
-            // 注册tab切换事件
-            this.tabControl.SelectedIndexChanged += new EventHandler(tabControl_SelectedIndexChanged);
+
+            _costumes = new GuiItems(BstManager.TypeCostume);
+            tabCostume.Controls.Add(_costumes);
+
+            tabControl.SelectedIndexChanged += new EventHandler(tabControl_SelectedIndexChanged);
         }
 
         private void CheckBnsGamePath()
         {
-            new Thread(() =>
+            Task.Run(() =>
             {
                 var gamePath = (string) BstManager.Instance.SystemSettings["path"]["game"];
                 if (!Directory.Exists(gamePath) || !File.Exists(gamePath + "/bin/Client.exe"))
@@ -83,22 +80,22 @@ namespace BladeSoulTool
                         BstI18NLoader.Instance.LoadI18NValue("App", "gamePathErrContent")
                     );
                 }
-            }).Start();
+            });
         }
 
         private void CheckNewVersion()
         {
             var currentVer = (string) BstManager.Instance.SystemSettings["version"];
-            new Thread(() =>
+            Task.Run(() =>
             {
                 var releasedVer = BstManager.GetStringFromWeb(BstManager.GithubVersionTxt);
                 // releasedVer是从网络下载的，在网络无法访问或下载失败的情况下，可能为null，需要做验证
                 if (!String.IsNullOrEmpty(releasedVer) && currentVer != releasedVer)
                 {
                     var result = BstManager.DisplayConfirmMessageBox(
-                        this._i18N.LoadI18NValue("App", "newVerTitle"),
+                        _i18N.LoadI18NValue("App", "newVerTitle"),
                         string.Format(
-                            this._i18N.LoadI18NValue("App", "newVerContent"),
+                            _i18N.LoadI18NValue("App", "newVerContent"),
                             currentVer,
                             releasedVer,
                             BstI18NLoader.Instance.LoadI18NValue("App", "releaseSiteUrl"))
@@ -108,55 +105,50 @@ namespace BladeSoulTool
                         Process.Start(BstI18NLoader.Instance.LoadI18NValue("App", "releaseSiteUrl"));
                     }
                 }
-            }).Start();
+            });
         }
 
         private void tabControl_SelectedIndexChanged(Object sender, EventArgs e)
         {
-            BstLogger.Instance.Log("[App] Switch to tab: " + this.tabControl.SelectedIndex);
-            switch (this.tabControl.SelectedIndex)
+            BstLogger.Instance.Log("[App] Switch to tab: " + tabControl.SelectedIndex);
+            switch (tabControl.SelectedIndex)
             {
                 case BstManager.TypeCostume:
-                    if (this._formCostume == null) 
+                    if (_costumes == null) 
                     {
-                        this._formCostume = App.CreateItemsForm(BstManager.TypeCostume);
-                        this.tabCostume.Controls.Add(this._formCostume);
+                        _costumes = new GuiItems(BstManager.TypeCostume);
+                        tabCostume.Controls.Add(_costumes);
                     }
                     break;
                 case BstManager.TypeAttach:
-                    if (this._formAttach == null)
+                    if (_formAttach == null)
                     {
-                        this._formAttach = App.CreateItemsForm(BstManager.TypeAttach);
-                        this.tabAttach.Controls.Add(this._formAttach);
+                        _formAttach = new GuiItems(BstManager.TypeAttach);
+                        tabAttach.Controls.Add(_formAttach);
                     }
                     break;
                 case BstManager.TypeWeapon:
-                    if (this._formWeapon == null)
+                    if (_formWeapon == null)
                     {
-                        this._formWeapon = App.CreateItemsForm(BstManager.TypeWeapon);
-                        this.tabWeapon.Controls.Add(this._formWeapon);
+                        _formWeapon = new GuiItems(BstManager.TypeWeapon);
+                        tabWeapon.Controls.Add(_formWeapon);
                     }
                     break;
                 case BstManager.TypeUtil:
-                    if (this._formUtil == null)
+                    if (_formUtil == null)
                     {
-                        this._formUtil = App.CreateUtilForm();
-                        this.tabUtil.Controls.Add(this._formUtil);
+                        _formUtil = CreateUtilForm();
+                        tabUtil.Controls.Add(_formUtil);
                     }
                     break;
                 default:
                     break;
             }
         }
-
-        private static Form CreateItemsForm(int type)
-        {
-            return App.CreateFormAttr(new GuiItems(type));
-        }
-
+        
         private static Form CreateUtilForm()
         {
-            return App.CreateFormAttr(new GuiUtil());
+            return CreateFormAttr(new GuiUtil());
         }
 
         private static Form CreateFormAttr(Form form)

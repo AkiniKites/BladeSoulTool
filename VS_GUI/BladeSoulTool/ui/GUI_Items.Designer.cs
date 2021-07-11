@@ -91,8 +91,10 @@
             this.gridItems.Location = new System.Drawing.Point(12, 141);
             this.gridItems.MultiSelect = false;
             this.gridItems.Name = "gridItems";
+            this.gridItems.RowHeadersVisible = false;
             this.gridItems.RowTemplate.Height = 23;
-            this.gridItems.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
+            this.gridItems.ScrollBars = System.Windows.Forms.ScrollBars.None;
+            this.gridItems.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.gridItems.Size = new System.Drawing.Size(400, 557);
             this.gridItems.TabIndex = 1;
             // 
@@ -344,8 +346,6 @@
             // 
             // GuiItems
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoSize = true;
             this.ClientSize = new System.Drawing.Size(1177, 804);
             this.Controls.Add(this.labelRestore);
@@ -410,7 +410,5 @@
         private System.Windows.Forms.Label labelFilter;
         private System.Windows.Forms.Button btnFilter;
         private System.Windows.Forms.Label labelRestore;
-        
-
     }
 }

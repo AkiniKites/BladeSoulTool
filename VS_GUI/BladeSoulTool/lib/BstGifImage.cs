@@ -14,46 +14,46 @@ namespace BladeSoulTool.lib
 
         public BstGifImage(string path)
         {
-            this._gifImage = Image.FromFile(path); // initialize
-            this._dimension = new FrameDimension(this._gifImage.FrameDimensionsList[0]); // gets the GUID
-            this._frameCount = this._gifImage.GetFrameCount(this._dimension); // total frames in the animation
+            _gifImage = Image.FromFile(path); // initialize
+            _dimension = new FrameDimension(_gifImage.FrameDimensionsList[0]); // gets the GUID
+            _frameCount = _gifImage.GetFrameCount(_dimension); // total frames in the animation
         }
 
         public bool ReverseAtEnd
         {
             // whether the gif should play backwards when it reaches the end
-            get { return this._reverse; }
-            set { this._reverse = value; }
+            get { return _reverse; }
+            set { _reverse = value; }
         }
 
         public Image GetNextFrame()
         {
 
-            this._currentFrame += this._step;
+            _currentFrame += _step;
 
             // if the animation reaches a boundary ...
-            if (this._currentFrame >= this._frameCount || this._currentFrame < 1)
+            if (_currentFrame >= _frameCount || _currentFrame < 1)
             {
-                if (this._reverse)
+                if (_reverse)
                 {
-                    this._step *= -1;
+                    _step *= -1;
                     // ... reverse the count
                     // apply it
-                    this._currentFrame += this._step;
+                    _currentFrame += _step;
                 }
                 else
                 {
                     //...or start over
-                    this._currentFrame = 0;
+                    _currentFrame = 0;
                 }
             }
-            return this.GetFrame(this._currentFrame);
+            return GetFrame(_currentFrame);
         }
 
         public Image GetFrame(int index)
         {
-            this._gifImage.SelectActiveFrame(_dimension, index); // find the frame
-            return (Image) this._gifImage.Clone(); // return a copy of it
+            _gifImage.SelectActiveFrame(_dimension, index); // find the frame
+            return (Image) _gifImage.Clone(); // return a copy of it
         }
     }
 }
