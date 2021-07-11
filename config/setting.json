@@ -19,7 +19,7 @@
   },
   "umodel_shooter": {
     "childProcess": 5,
-    "cycleInterval": 10
+    "cycleInterval": 50
   },
   "icon_dumper": {
     "childProcess": 10,

@@ -4,6 +4,8 @@ var cp = require('child_process');
 var path = require('path');
 const { nanoid } = require('nanoid')
 
+var fs = require('fs');
+
 /**
  * @type {BstUtil|exports}
  */
@@ -33,6 +35,12 @@ var BstScreenShooter = function(grunt, overwrite, done) {
     this.statusWorkingChildProcess = 0;
 
     this.backupList = []; // 存储为了截图修改过的骨骼备份文件，统一删除
+
+    this.tempFiles = {};
+    this.tempFilesPath = path.join(this.util.getWorkingPath(), 'temp-shooter.json');
+    if (fs.existsSync(this.tempFilesPath)) {
+        this.tempFiles = this.util.readJsonFile(this.tempFilesPath);
+    }
 };
 
 BstScreenShooter.prototype.start = function() {
@@ -70,8 +78,9 @@ BstScreenShooter.prototype.processType = function(type) {
         self.util.deleteDir(targetOutputPath, false); // 文件夹没找到也不要报错
         self.util.mkdir(targetOutputPath);
     }
-    if (!self.grunt.file.exists(targetOutputPath))
+    if (!self.grunt.file.exists(targetOutputPath)) {
         self.util.mkdir(targetOutputPath);
+    }
 
     var timer = setInterval(function() {
         while (self.statusWorkingChildProcess < self.childProcess && self.workingList.length > 0) {
@@ -81,6 +90,10 @@ BstScreenShooter.prototype.processType = function(type) {
         if (self.statusWorkingChildProcess == 0 && self.workingList.length == 0) {
             // 任务全部完成
             clearInterval(timer);
+
+            for (const tempFile of Object.keys(self.tempFiles)) {
+                self.util.deleteFile(tempFile);
+            }
             self.util.clearWorkingDir();            
             self.util.printHr();
             self.grunt.log.writeln('[BstScreenShooter] All "' + type + '" photo shot.');
@@ -115,34 +128,27 @@ BstScreenShooter.prototype.processSingle = function(type, element) {
         self.finishSingle(name);
         return;
     }
-
-    let workingPath = path.join(self.util.getWorkingPath(), nanoid());
-    self.util.mkdir(workingPath);
-
-    let fail = false;
-    let skeletonPath = self.util.copyResourceUpk(element['skeleton'], workingPath, () => fail = true);
-    self.util.copyResourceUpk(element['texture'], workingPath, () => fail = true);
-    self.util.copyResourceUpk(element['material'], workingPath, () => fail = true);
-    self.util.copyResourceUpk(element['col1Material'], workingPath, () => fail = true);
-
-    // scan upkId.log to copy all resources upk
-    if (!fail) {
-        let upkLog = self.util.readFileSplitWithLineBreak(path.join(BstConst.PATH_UPK_LOG, element['skeleton'] + '.log'));
-        for (const line of upkLog) {
-            let match = line.match(/(\d+).upk/);
-            if (match !== null) {
-                self.util.copyResourceUpk(match[1], workingPath, () => fail = true);
-            }
-        }
-    }
-
-    if (fail || skeletonPath === null) {
-        self.finishSingle(name, workingPath);
+    
+    let tempSkeletonFile;
+    let skeletonName = element['skeleton'];    
+    let skeletonPath = self.util.findUpkPath(skeletonName);
+    if (skeletonPath === null) {
+        self.finishSingle(name);
         return;
     }
 
     // 修改skeleton骨骼upk里的值，调整成非默认配色
-    var handleUpk = function() {
+    var handleUpk = function() {        
+        let pp = path.parse(skeletonPath);
+        skeletonName = pp.name + nanoid(10) + '-bst';
+        tempSkeletonFile = path.join(pp.dir, skeletonName + pp.ext);
+
+        self.tempFiles[tempSkeletonFile] = true;
+        self.saveTempFiles();
+
+        self.util.copyFile(skeletonPath, tempSkeletonFile);
+        skeletonPath = tempSkeletonFile;
+
         self.util.readFileToBuffer(skeletonPath, function(data, path) {
             data = self.util.replaceAllBytes(data, element['col1Material'], element['material']);
             data = self.util.replaceAllBytes(data, 'col1', element['col']);
@@ -157,7 +163,7 @@ BstScreenShooter.prototype.processSingle = function(type, element) {
 
     // 将upk文件使用umodel进行可视化
     var handleUmodel = function() {
-        const cmd = `umodel.exe -view -meshes -path="${path.dirname(skeletonPath)}" -game=bns ${element['skeleton']}`;
+        const cmd = `umodel.exe -view -meshes -path="${path.dirname(skeletonPath)}" -game=bns ${skeletonName}`;
         self.grunt.log.writeln('[BstScreenShooter] Run: ' + cmd);
         var worker = cp.exec(
             cmd,
@@ -166,16 +172,17 @@ BstScreenShooter.prototype.processSingle = function(type, element) {
         worker.stdout.on('data', function (data) { self.util.logChildProcessStdout(data); });
         worker.stderr.on('data', function (data) {
             self.util.logChildProcessStderr(data);
+            
             if (element['col'] !== 'col1') {
-                // 出错了，而且当前material并非col1，则直接将col1的图拷贝过来
-                var imgBasePath = path.join('database', type,  'pics');
-                var col1ImgPath = path.join(imgBasePath, element['core'] + '_col1.png');
-                if (self.grunt.file.exists(col1ImgPath)) {
-                    self.util.copyFile(
-                        col1ImgPath,
-                        path.join(imgBasePath, name + '.png')
-                    );
-                }
+            //     // 出错了，而且当前material并非col1，则直接将col1的图拷贝过来
+            //     var imgBasePath = path.join('database', type,  'pics');
+            //     var col1ImgPath = path.join(imgBasePath, element['core'] + '_col1.png');
+            //     if (self.grunt.file.exists(col1ImgPath)) {
+            //         self.util.copyFile(
+            //             col1ImgPath,
+            //             path.join(imgBasePath, name + '.png')
+            //         );
+            //     }
             }
         });
         worker.on('exit', function (code) { self.util.logChildProcessExit('umodel', code); });
@@ -184,9 +191,9 @@ BstScreenShooter.prototype.processSingle = function(type, element) {
     };
     
     var handleExport = function(umodel) {
-        const timeout = 1000, width = 500, height = 600;
+        const timeout = 10000, width = 500, height = 600;
 
-        const cmd = `ExportTool ${umodel.pid} ${timeout} ${width} ${height} "${outputPath}"`;
+        const cmd = `ExportTool ${umodel.pid} ${timeout} ${width} ${height} true "${outputPath}"`;
         self.grunt.log.writeln('[BstScreenShooter] Run: ' + cmd);
         var worker = cp.exec(
             cmd,
@@ -197,7 +204,7 @@ BstScreenShooter.prototype.processSingle = function(type, element) {
         worker.on('exit', function (code) {
             self.util.logChildProcessExit('ExportTool', code);
             umodel.kill();
-            self.finishSingle(name, workingPath);
+            self.finishSingle(name, tempSkeletonFile);
         });
     };
 
@@ -209,9 +216,24 @@ BstScreenShooter.prototype.processSingle = function(type, element) {
     }
 };
 
-BstScreenShooter.prototype.finishSingle = function(name, workingPath) {
-    if (workingPath !== undefined) {
-        this.util.deleteDir(workingPath);
+BstScreenShooter.prototype.saveTempFiles = function() {
+    this.util.writeFile(this.tempFilesPath, this.util.formatJson(this.tempFiles));
+}
+
+BstScreenShooter.prototype.finishSingle = function(name, tempSkeletonFile) {
+    if (tempSkeletonFile !== undefined) {
+        let deleteOk = false;
+        try {
+            this.grunt.file.delete(tempSkeletonFile, {'force':true});
+            deleteOk = true;
+        } catch (err) {
+            this.grunt.log.error(err);
+        }
+
+        if (deleteOk && this.tempFiles.hasOwnProperty(tempSkeletonFile)) {
+            delete this.tempFiles[tempSkeletonFile];
+            this.saveTempFiles();
+        }
     }
 
     this.statusWorkingChildProcess--;
