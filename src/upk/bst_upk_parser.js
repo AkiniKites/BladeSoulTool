@@ -761,10 +761,20 @@ BstUpkParser.prototype.buildDatabase = function() {
         self.util.printHr();
     }
 
+    function sortObj(unordered) {
+        return Object.keys(unordered).sort().reduce(
+            (obj, key) => { 
+                obj[key] = unordered[key]; 
+                return obj;
+            }, 
+            {}
+        );
+    }
+
     // 写入数据
     for (const type of BstConst.PART_TYPES) {
-        self.util.writeFile(path.join(BstConst.PATH_DATABASE, type, 'data', 'data.json'), self.util.formatJson(self.db[type]));
-        self.util.writeFile(path.join(BstConst.PATH_DATABASE, type, 'data', 'data_invalid.json'), self.util.formatJson(self.dbInvalid[type]));
+        self.util.writeFile(path.join(BstConst.PATH_DATABASE, type, 'data', 'data.json'), self.util.formatJson(sortObj(self.db[type])));
+        self.util.writeFile(path.join(BstConst.PATH_DATABASE, type, 'data', 'data_invalid.json'), self.util.formatJson(sortObj(self.dbInvalid[type])));
         self.grunt.log.writeln('[BstUpkParser] Database build of ' + type + ' done ...');
     }
 
