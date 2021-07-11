@@ -18,60 +18,82 @@ namespace ExportTool
     {
         static int Main(string[] args)
         {
-            if (args.Length != 5)
-            {
-                Console.WriteLine("Invalid number of arguments");
-                return 1;
-            }
+            bool debug = args[0] == "debug";
 
-            int pid = int.Parse(args[0]);
+            int pid = debug ? 0 : int.Parse(args[0]);
             int timeout = int.Parse(args[1]);
 
             int w = int.Parse(args[2]);
             int l = int.Parse(args[3]);
 
-            string output = args[4];
+            bool crop = bool.Parse(args[4]);
 
-            var (hWnd, p) = WaitForWindow(pid, timeout);
+            string output = args[5];
+
+            var (hWnd, p) = WaitForWindow(pid, timeout, debug);
 
             try
             {
-                ResizeWindow(hWnd, w, l);
+                Bitmap img;
 
-                Thread.Sleep(250); //wait for repaint
+                if (!crop)
+                {
+                    ResizeWindow(hWnd, w, l);
+                    Thread.Sleep(250); //wait for repaint
+                    img = GetScreenshot(hWnd);
+                }
+                else
+                {
+                    Thread.Sleep(250); //wait for repaint
+                    var full = GetScreenshot(hWnd);
+                    var outW = Math.Min(full.Width, w);
+                    var outL = Math.Min(full.Height, l);
 
-                var img = GetScreenshot(hWnd);
-
+                    var x = (full.Width - outW) / 2;
+                    var y = (full.Height - outL) / 2;
+                    img = Crop(full, new Rectangle(x, y, outW, outL));
+                }
+                
                 var dir = Path.GetDirectoryName(output);
-                if (!Directory.Exists(dir))
+                if (!String.IsNullOrEmpty(dir) && !Directory.Exists(dir))
                     Directory.CreateDirectory(dir);
                 img.Save(output, ImageFormat.Png);
             }
             finally
             {
-                CloseWindow(hWnd);
+                if (!debug)
+                {
+                    CloseWindow(hWnd);
 
-                if (!p.WaitForExit(timeout))
-                    throw new InvalidOperationException("Process did not exit in time: " + pid);
+                    if (!p.WaitForExit(timeout))
+                        throw new InvalidOperationException("Process did not exit in time: " + pid);
+                }
             }
 
             return 0;
         }
 
-        static (IntPtr, Process) WaitForWindow(int pid, int timeout)
+        static (IntPtr, Process) WaitForWindow(int pid, int timeout, bool debug)
         {
             Process p = null;
-            if (!WaitFor(timeout, () =>
+            if (debug)
             {
-                var children = GetAllChildProcesses(pid);
-                if (!children.Any())
-                    return false;
+                p = Process.GetProcessesByName("umodel")[0];
+            }
+            else
+            {
+                if (!WaitFor(timeout, () =>
+                {
+                    var children = GetAllChildProcesses(pid);
+                    if (!children.Any())
+                        return false;
 
-                p = Process.GetProcessById(children[0]);
-                return true;
-            }))
-            {
-                throw new InvalidOperationException("Unable to find child process with pid: " + pid);
+                    p = Process.GetProcessById(children[0]);
+                    return true;
+                }))
+                {
+                    throw new InvalidOperationException("Unable to find child process with pid: " + pid);
+                }
             }
 
             IntPtr hWnd = IntPtr.Zero;
@@ -145,6 +167,37 @@ namespace ExportTool
         static void CloseWindow(IntPtr hWnd)
         {
             Win32.SendMessage(hWnd, Win32.WM_CLOSE, IntPtr.Zero, IntPtr.Zero);
+        }
+
+        static Bitmap Crop(Bitmap image, Rectangle area)
+        {
+            var result = new Bitmap(area.Width, area.Height, image.PixelFormat);
+
+            unsafe
+            {
+                var bmd = image.LockBits(area, ImageLockMode.ReadOnly, image.PixelFormat);
+                var bmdOut = result.LockBits(new Rectangle(0, 0, area.Width, area.Height),
+                    ImageLockMode.WriteOnly, result.PixelFormat);
+
+                int pixelSize = Image.GetPixelFormatSize(image.PixelFormat) / 8;
+                
+                var to = (byte*)bmdOut.Scan0 - 1 * bmdOut.Stride;
+                var from = (byte*)bmd.Scan0 - 1 * bmd.Stride;
+
+                //Copy the memory from each row in the first bitmap to second
+                for (int y = 0; y < bmd.Height; y++)
+                {
+                    to += bmdOut.Stride;
+                    from += bmd.Stride;
+
+                    Win32.MoveMemory(to, from, area.Width * pixelSize);
+                }
+
+                image.UnlockBits(bmd);
+                result.UnlockBits(bmdOut);
+            }
+
+            return result;
         }
     }
 }

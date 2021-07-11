@@ -29,7 +29,10 @@ namespace ExportTool
 
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
         public static extern IntPtr SendMessage(IntPtr hWnd, UInt32 Msg, IntPtr wParam, IntPtr lParam);
-        
+
+        [DllImport("Kernel32.dll", EntryPoint = "RtlMoveMemory", SetLastError = false)]
+        public static extern unsafe void MoveMemory(void* dest, void* src, int size);
+
         [StructLayout(LayoutKind.Sequential)]
         public struct RECT
         {
