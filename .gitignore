@@ -6,6 +6,7 @@ logs/*.log
 resources/others/剑灵模型识别器_V1.0.13.1226_by_纯粹之伤/notify.log
 resources/dedat/Bns_DatEditor/tmp
 !resources/dedat/output/engine
+resources/umodel/*.log
 resources/optipng/output**/*.png
 resources/tga2png/output/**/*.png
 database/attach/pics/**/*.zip

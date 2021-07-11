@@ -92,7 +92,7 @@ BstScreenShooter.prototype.processType = function(type) {
             clearInterval(timer);
 
             for (const tempFile of Object.keys(self.tempFiles)) {
-                self.util.deleteFile(tempFile);
+                self.util.deleteFileSilent(tempFile);
             }
             self.util.clearWorkingDir();            
             self.util.printHr();
@@ -223,8 +223,8 @@ BstScreenShooter.prototype.saveTempFiles = function() {
 BstScreenShooter.prototype.finishSingle = function(name, tempSkeletonFile) {
     if (tempSkeletonFile !== undefined) {
         let deleteOk = false;
-        try {
-            this.grunt.file.delete(tempSkeletonFile, {'force':true});
+        try {            
+            this.util.deleteFileSilent(tempSkeletonFile);
             deleteOk = true;
         } catch (err) {
             this.grunt.log.error(err);

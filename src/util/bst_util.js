@@ -96,6 +96,15 @@ BstUtil.prototype.deleteFile = function(path, needFail) {
         this.grunt.log.writeln('[BstUtil] Delete file: ' + path);
     }
 };
+BstUtil.prototype.deleteFileSilent = function(path) {
+    try{
+        if (this.checkFileExists(path, false)) {
+            this.grunt.file.delete(path, {'force':true});
+        }
+    } catch (err) {
+        // eslint-disable-next-line no-empty        
+    }
+};
 
 BstUtil.prototype.mkdir = function(path) {
     if (!this.grunt.file.exists(path)) {
@@ -289,9 +298,10 @@ BstUtil.prototype.restoreFile = function(backupPath) { // 这里的path是带后
 };
 
 BstUtil.prototype.clearWorkingDir = function() {
-    this.grunt.file.recurse(this.getWorkingPath(), function(abspath, rootdir, subdir, filename) {
+    const self = this;
+    self.grunt.file.recurse(self.getWorkingPath(), function(abspath, rootdir, subdir, filename) {
         if (filename !== 'working_3d_dir') {
-            this.util.deleteFile(abspath);
+            self.deleteFileSilent(abspath);
         }
     });
 };
