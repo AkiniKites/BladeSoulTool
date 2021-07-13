@@ -31,11 +31,20 @@ namespace BladeSoulTool.lib
             timer.Enabled = true;
         }
 
+        private static string GetTime() => DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-ffff") + " ";
+
         public static void Log(string msg)
         {
             lock(_lock)
             {
-                _buffer.AppendLine(DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss-ffff") + " " + msg);
+                _buffer.AppendLine(GetTime() + msg);
+            }
+        }
+        public static void Log(Exception ex)
+        {
+            lock (_lock)
+            {
+                _buffer.AppendLine(GetTime() + ex);
             }
         }
     }

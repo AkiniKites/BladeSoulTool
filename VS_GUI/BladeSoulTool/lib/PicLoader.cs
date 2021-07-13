@@ -47,7 +47,7 @@ namespace BladeSoulTool.lib
                         }
                         catch (InvalidOperationException ex)
                         {
-                            Logger.Log(ex.ToString());
+                            Logger.Log(ex);
                             // Because we may display the loading dynamic graph in the PictureBox in the GUI of the GUI_Picture.
                             // The above window may be destroyed after being closed.Here we need to handle the error after the window is destroyed.
                             // At this time, Timer should be registered in the Dictionary.
@@ -67,21 +67,9 @@ namespace BladeSoulTool.lib
                 {
                     loadingTimer = LoadingTimers[picture];
                 }
-
-                byte[] blob = null;
-
+                
                 var imgpath = Manager.GetItemPicPath(type, elementData);
-                // Check if there is a local cache
-                if (File.Exists(imgpath))
-                {
-                    // Local cache exists, read directly
-                    blob = Manager.GetBytesFromFile(imgpath);
-                }
-                else
-                {
-                    imgpath = Manager.GetItemPicPath(type, elementData);
-                    blob = Manager.GetBytesFromFile(imgpath);
-                }
+                var blob = Utility.GetBytesFromFile(imgpath);
 
                 if (blob == null)
                 {
@@ -105,7 +93,7 @@ namespace BladeSoulTool.lib
                 }
                 catch (Exception ex)
                 {
-                    Logger.Log(ex.ToString());
+                    Logger.Log(ex);
                 }
             }).Start();
         }

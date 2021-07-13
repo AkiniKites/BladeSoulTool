@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.pictureBoxUmodel = new System.Windows.Forms.PictureBox();
+            this.pbUmodel = new System.Windows.Forms.PictureBox();
             this.gridItems = new System.Windows.Forms.DataGridView();
             this.labelRace = new System.Windows.Forms.Label();
             this.comboBoxRace = new System.Windows.Forms.ComboBox();
@@ -57,7 +57,7 @@
             this.labelFilter = new System.Windows.Forms.Label();
             this.btnFilter = new System.Windows.Forms.Button();
             this.labelRestore = new System.Windows.Forms.Label();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxUmodel)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbUmodel)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridItems)).BeginInit();
             this.panelTarget.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBoxOrigin)).BeginInit();
@@ -66,18 +66,19 @@
             this.panelInfo.SuspendLayout();
             this.SuspendLayout();
             // 
-            // pictureBoxUmodel
+            // pbUmodel
             // 
-            this.pictureBoxUmodel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            this.pbUmodel.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.pictureBoxUmodel.BackColor = System.Drawing.SystemColors.Window;
-            this.pictureBoxUmodel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-            this.pictureBoxUmodel.Location = new System.Drawing.Point(665, 141);
-            this.pictureBoxUmodel.Name = "pictureBoxUmodel";
-            this.pictureBoxUmodel.Size = new System.Drawing.Size(500, 650);
-            this.pictureBoxUmodel.TabIndex = 0;
-            this.pictureBoxUmodel.TabStop = false;
+            this.pbUmodel.BackColor = System.Drawing.SystemColors.Window;
+            this.pbUmodel.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
+            this.pbUmodel.Location = new System.Drawing.Point(665, 141);
+            this.pbUmodel.Name = "pbUmodel";
+            this.pbUmodel.Size = new System.Drawing.Size(500, 650);
+            this.pbUmodel.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pbUmodel.TabIndex = 0;
+            this.pbUmodel.TabStop = false;
             // 
             // gridItems
             // 
@@ -85,6 +86,8 @@
             this.gridItems.AllowUserToDeleteRows = false;
             this.gridItems.AllowUserToResizeColumns = false;
             this.gridItems.AllowUserToResizeRows = false;
+            this.gridItems.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left)));
             this.gridItems.AutoSizeColumnsMode = System.Windows.Forms.DataGridViewAutoSizeColumnsMode.Fill;
             this.gridItems.BackgroundColor = System.Drawing.SystemColors.Window;
             this.gridItems.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
@@ -240,8 +243,7 @@
             // 
             // textBoxOut
             // 
-            this.textBoxOut.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left)));
+            this.textBoxOut.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.textBoxOut.BackColor = System.Drawing.SystemColors.Window;
             this.textBoxOut.Location = new System.Drawing.Point(12, 704);
             this.textBoxOut.Multiline = true;
@@ -360,10 +362,10 @@
             this.Controls.Add(this.comboBoxRace);
             this.Controls.Add(this.labelRace);
             this.Controls.Add(this.gridItems);
-            this.Controls.Add(this.pictureBoxUmodel);
+            this.Controls.Add(this.pbUmodel);
             this.Name = "GuiItems";
             this.Size = new System.Drawing.Size(1177, 804);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBoxUmodel)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbUmodel)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gridItems)).EndInit();
             this.panelTarget.ResumeLayout(false);
             this.panelTarget.PerformLayout();
@@ -380,7 +382,7 @@
 
         #endregion
 
-        private System.Windows.Forms.PictureBox pictureBoxUmodel;
+        private System.Windows.Forms.PictureBox pbUmodel;
         private System.Windows.Forms.DataGridView gridItems;
         private System.Windows.Forms.Label labelRace;
         private System.Windows.Forms.ComboBox comboBoxRace;

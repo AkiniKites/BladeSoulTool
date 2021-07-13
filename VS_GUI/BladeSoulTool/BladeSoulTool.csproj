@@ -53,7 +53,7 @@
   <ItemGroup>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>resources\Json60r3\Bin\Net20\Newtonsoft.Json.dll</HintPath>
+      <HintPath>resources\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -72,6 +72,7 @@
     <Compile Include="lib\IconLoadTask.cs" />
     <Compile Include="lib\PicLoader.cs" />
     <Compile Include="lib\GifImage.cs" />
+    <Compile Include="lib\Utility.cs" />
     <Compile Include="ui\GUI_Util.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -130,9 +131,6 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <None Include="resources\Json60r3.zip" />
-    <None Include="resources\Json60r3\.DS_Store" />
-    <None Include="resources\Json60r3\Bin\.DS_Store" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
@@ -152,13 +150,11 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="resources\Json60r3\Bin\Net20\Newtonsoft.Json.dll" />
-    <Content Include="resources\Json60r3\Bin\Net20\Newtonsoft.Json.pdb" />
-    <Content Include="resources\Json60r3\Bin\Net20\Newtonsoft.Json.xml" />
-    <Content Include="resources\wekeroad-ink.vssettings" />
+    <Folder Include="log\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="log\" />
+    <Content Include="resources\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.dll" />
+    <Content Include="resources\Newtonsoft.Json.13.0.1\lib\net45\Newtonsoft.Json.xml" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -35,7 +35,6 @@ namespace BladeSoulTool
             InitializeComponent();
 
             Manager.CreateInstance();
-            IconLoader.CreateInstance();
 
             CheckBnsGamePath();
 
@@ -114,6 +113,7 @@ namespace BladeSoulTool
                 if (_items[idx] == null)
                 {
                     _items[idx] = new GuiItems(idx);
+                    _items[idx].Dock = DockStyle.Fill;
                     
                     switch(idx)
                     {

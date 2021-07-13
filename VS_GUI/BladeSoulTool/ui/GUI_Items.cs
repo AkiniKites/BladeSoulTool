@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -26,14 +28,17 @@ namespace BladeSoulTool.ui
         private JObject _originSettings;
 
         private I18NLoader _i18N;
+        private IconLoader _iconLoader;
 
         private bool _loaded = false;
-
+        
         public GuiItems(int formType)
         {
             InitializeComponent();
             InitI18N();
             Init(formType);
+
+            _iconLoader = new IconLoader(gridItems, textBoxOut);
         }
 
         private void InitI18N()
@@ -159,7 +164,7 @@ namespace BladeSoulTool.ui
                 }
                 if (originData != null)
                 {
-                    LoadOriginAndTargetIconPic(pictureBoxOrigin, originData, true);
+                    LoadOriginAndTargetIconPic(pictureBoxOrigin, originData);
                     Manager.ShowMsgInTextBox(textBoxOrigin, originData.ToString(), false);
                 }
 
@@ -184,20 +189,21 @@ namespace BladeSoulTool.ui
                     var elementData = (JObject) element.Value;
                     // 填充数据
                     // 这里暂时不考虑做成动态的gif动画，考虑到列表里的项可能比较多，那么多timer更新gif动态图可能造成性能问题
-                    _dataTable.Rows.Add(new object[] { Manager.Instance.LoadingGifBytes, elementId }); 
+                    _dataTable.Rows.Add(Manager.Instance.LoadingGifBytes, elementId); 
                     var rowId = _dataTable.Rows.Count - 1;
-                    IconLoader.Instance.RegisterTask(new IconLoadTask(
-                        elementData, gridItems, _dataTable, rowId, textBoxOut
-                    ));
+                    _iconLoader.AddTask(new IconLoadTask(elementData, _dataTable, rowId));
                 }
 
                 Manager.ShowMsgInTextBox(textBoxOut, _i18N.LoadI18NValue("GuiItems", "logEndLoadDataList"));
-                IconLoader.Instance.Start(); // 启动图片加载器
+                _iconLoader.Start(); // 启动图片加载器
             });
         }
 
         private void ClearFormStatus()
         {
+            // 清空之前的加载队列，准备重新填充加载内容
+            _iconLoader.Stop();
+
             // 重置form的状态
             _selectedElementId = null;
             _originElementId = null;
@@ -210,13 +216,10 @@ namespace BladeSoulTool.ui
 
             pictureBoxOrigin.Image = null;
             pictureBoxTarget.Image = null;
-            pictureBoxUmodel.Image = null;
+            pbUmodel.Image = null;
 
             _data = null;
             _dataTable.Clear();
-
-            // 清空之前的加载队列，准备重新填充加载内容
-            IconLoader.Instance.Stop();
         }
         
         private void GridItemsOnSelectionChanged(object sender, EventArgs e)
@@ -229,7 +232,7 @@ namespace BladeSoulTool.ui
             var elementData = (JObject)_data[_selectedElementId];
             textBoxInfo.Text = elementData.ToString();
             // 模型截图控件
-            PicLoader.LoadPic(_formType, elementData, pictureBoxUmodel, textBoxOut);
+            PicLoader.LoadPic(_formType, elementData, pbUmodel, textBoxOut);
         }
         
         private void comboBoxRace_SelectedIndexChanged(Object sender, EventArgs e)
@@ -273,7 +276,7 @@ namespace BladeSoulTool.ui
                     _selectedElementId = elementId;
                     textBoxInfo.Text = elementData.ToString();
                     // 模型截图控件
-                    PicLoader.LoadPic(_formType, elementData, pictureBoxUmodel, textBoxOut);
+                    PicLoader.LoadPic(_formType, elementData, pbUmodel, textBoxOut);
                     // 更新列表展示位置
                     gridItems.FirstDisplayedScrollingRowIndex = i;
                     break;
@@ -493,27 +496,14 @@ namespace BladeSoulTool.ui
             pictureForm.ShowDialog();
         }
 
-        private void LoadOriginAndTargetIconPic(PictureBox picture, JObject elementData, bool async = false)
+        private void LoadOriginAndTargetIconPic(PictureBox picture, JObject elementData)
         {
             var cachePath = Manager.GetIconPath(elementData);
-            if(!File.Exists(cachePath))
-            {
-                cachePath = Manager.GetIconPath(elementData);
-            }
-            if (async)
-            {
-                picture.TryBeginInvoke(() =>
-                {
-                    picture.ImageLocation = File.Exists(cachePath) ? cachePath : Manager.PathErrorIcon;
-                    picture.Load();
-                });
-            }
-            else
+            picture.TryBeginInvoke(() =>
             {
                 picture.ImageLocation = File.Exists(cachePath) ? cachePath : Manager.PathErrorIcon;
                 picture.Load();
-            }
+            });
         }
-
     }
 }

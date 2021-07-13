@@ -24,3 +24,9 @@ VS_GUI/**/obj/*
 VS_GUI/**/tmp/*
 
 database*/
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates

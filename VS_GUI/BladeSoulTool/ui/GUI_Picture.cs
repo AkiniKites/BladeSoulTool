@@ -9,7 +9,7 @@ namespace BladeSoulTool.ui
         {
             InitializeComponent();
 
-            Shown += (s, e) => PicLoader.LoadPic(type, elementId, pictureBox2D, box); // 页面展示后的事件
+            //Shown += (s, e) => PicLoader.LoadPic(type, elementId, pictureBox2D, box); // 页面展示后的事件
         }
     }
 }

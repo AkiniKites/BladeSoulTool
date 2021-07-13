@@ -7,19 +7,9 @@ namespace BladeSoulTool.lib
     {
         private static I18NLoader _instance;
 
-        public static I18NLoader Instance 
-        {
-            get 
-            {
-                if (_instance == null)
-                {
-                    _instance = new I18NLoader();
-                }
-                return _instance;
-            }
-        }
+        public static I18NLoader Instance => _instance ?? (_instance = new I18NLoader());
 
-        private JObject _i18n;
+        private readonly JObject _i18n;
 
         private I18NLoader()
         {
@@ -34,7 +24,7 @@ namespace BladeSoulTool.lib
             }
             catch (Exception ex)
             {
-                Logger.Log(ex.ToString());
+                Logger.Log(ex);
                 return null;
             }
         }

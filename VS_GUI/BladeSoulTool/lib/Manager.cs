@@ -6,6 +6,7 @@ using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -15,18 +16,8 @@ namespace BladeSoulTool.lib
     class Manager
     {
         private static Manager _instance;
+        public static Manager Instance => _instance ?? (_instance = new Manager());
 
-        public static Manager Instance 
-        {
-            get 
-            {
-                if (_instance == null) 
-                {
-                    _instance = new Manager();
-                }
-                return _instance;
-            }
-        }
         public static void CreateInstance()
         {
             if (_instance == null)
@@ -144,9 +135,9 @@ namespace BladeSoulTool.lib
                 "en_US", "zh_CN" 
             });
 
-            LoadingGifBytes = GetBytesFromFile(PathLoadingGif);
-            NoIconBytes = GetBytesFromFile(PathNoIcon);
-            ErrorIconBytes = GetBytesFromFile(PathErrorIcon);
+            LoadingGifBytes = Utility.GetBytesFromFile(PathLoadingGif);
+            NoIconBytes = Utility.GetBytesFromFile(PathNoIcon);
+            ErrorIconBytes = Utility.GetBytesFromFile(PathErrorIcon);
         }
 
         public static JObject ReadJsonFile(string path)
@@ -237,7 +228,7 @@ namespace BladeSoulTool.lib
             }
             catch (IOException ex)
             {
-                Logger.Log(ex.ToString());
+                Logger.Log(ex);
             }
         }
         
@@ -274,18 +265,6 @@ namespace BladeSoulTool.lib
             }
         }
 
-        public static void DisplayDataGridViewVerticalScrollBar(DataGridView grid)
-        {
-            try
-            {
-                grid.TryBeginInvoke(()=> grid.ScrollBars = ScrollBars.Vertical);
-            }
-            catch (Exception ex)
-            {
-                Logger.Log(ex.ToString());
-            }
-        }
-
         public static void CreateFile(string path)
         {
             File.Create(path).Dispose();
@@ -300,28 +279,6 @@ namespace BladeSoulTool.lib
             mStream.Dispose();
 
             return bitmap;
-        }
-
-        public static void WriteByteArrayToFile(string path, byte[] blob)
-        {
-            FileStream fs = null;
-            try
-            {
-                fs = new FileStream(path, FileMode.Create, FileAccess.Write);
-                fs.Write(blob, 0, blob.Length);
-            }
-            catch (Exception ex)
-            {
-                Logger.Log(ex.ToString());
-            }
-            finally
-            {
-                if (fs != null)
-                {
-                    fs.Close();
-                    fs.Dispose();
-                }
-            }
         }
 
         public static string GetStringFromWeb(string url)
@@ -339,57 +296,8 @@ namespace BladeSoulTool.lib
             }
             catch (Exception ex)
             {
-                Logger.Log(ex.ToString());
+                Logger.Log(ex);
                 return null;
-            }
-        }
-
-        public static byte[] GetBytesFromWeb(string url)
-        {
-            if (string.IsNullOrEmpty(url))
-            {
-                return null;
-            }
-
-            var webClient = new WebClient();
-
-            try
-            {
-                return webClient.DownloadData(url);
-            }
-            catch (Exception ex)
-            {
-                Logger.Log(ex.ToString());
-                return null;
-            }
-        }
-
-        public static byte[] GetBytesFromFile(string path)
-        {
-            if (!File.Exists(path)) {
-                return null; // 文件未找到，直接返回null
-            }
-            FileStream fs = null;
-
-            try
-            {
-                fs = File.OpenRead(path);
-                var bytes = new byte[fs.Length];
-                fs.Read(bytes, 0, Convert.ToInt32(fs.Length));
-                return bytes;
-            }
-            catch (Exception ex)
-            {
-                Logger.Log(ex.ToString());
-                return null;
-            }
-            finally
-            {
-                if (fs != null)
-                {
-                    fs.Close();
-                    fs.Dispose();
-                }
             }
         }
 
@@ -460,7 +368,7 @@ namespace BladeSoulTool.lib
                 }
                 catch (InvalidOperationException ex)
                 {
-                    Logger.Log(ex.ToString()); // 有的时候在显示的时候TextBox已经被销毁，忽略错误
+                    Logger.Log(ex); // 有的时候在显示的时候TextBox已经被销毁，忽略错误
                 }
             }
             if (logInConsole)
@@ -476,13 +384,10 @@ namespace BladeSoulTool.lib
                 Logger.Log(I18NLoader.Instance.LoadI18NValue("BstManager", "gruntAlreadyRun"));
                 return; // 已经有grunt脚本在运行了，这里不再运行新的脚本
             }
-            else
-            {
-                _isGruntRunning = true;
-            }
 
-            var worker = new BackgroundWorker();
-            worker.DoWork += (s, e) =>
+            _isGruntRunning = true;
+
+            Task.Run(() =>
             {
                 var proc = new Process();
 
@@ -513,14 +418,8 @@ namespace BladeSoulTool.lib
                 proc.OutputDataReceived += (dataSender, dataE) => ShowMsgInTextBox(box, dataE.Data); // 注册输出接收事件
                 proc.Start(); // 启动
                 proc.BeginOutputReadLine(); // 逐行读入输出
-            };
-            worker.RunWorkerCompleted += (s, e) =>
-            {
                 _isGruntRunning = false;
-                worker.Dispose();
-            };
-            worker.RunWorkerAsync();
+            });
         }
-
     }
 }
